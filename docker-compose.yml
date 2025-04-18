@@ -13,6 +13,17 @@ services:
       POSTGRES_DB: recipes-api-db
     ports:
       - "5432:5432"
+  
+  recipes-api:
+    container_name: recipes-api
+    build: ./recipes-api
+    restart: on-failure
+    networks:
+      - recman-network
+    ports:
+      - "8080:8080"
+    depends_on:
+      - recipes-api-db
 
 volumes:
   recipes-api-data:
