@@ -1,0 +1,23 @@
+services:
+  recipes-api-db:
+    container_name: recipes-api-db
+    image: postgres:15
+    restart: always
+    volumes:
+      - recipes-api-data:/var/lib/postgresql/data
+    networks:
+      - recman-network
+    environment:
+      POSTGRES_USER: recipes-api-db
+      POSTGRES_PASSWORD: recipes-api-db
+      POSTGRES_DB: recipes-api-db
+    ports:
+      - "5432:5432"
+
+volumes:
+  recipes-api-data:
+    name: recipes-api-data
+
+networks:
+  recman-network:
+    name: recman-network
