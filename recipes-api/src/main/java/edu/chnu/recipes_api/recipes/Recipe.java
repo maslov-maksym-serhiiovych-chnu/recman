@@ -2,6 +2,7 @@ package edu.chnu.recipes_api.recipes;
 
 import jakarta.persistence.*;
 
+@Table(name = "recipes")
 @Entity
 public class Recipe {
     @Id
