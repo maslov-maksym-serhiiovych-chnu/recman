@@ -13,4 +13,8 @@ public class Recipe {
     
     @Column(length = 1000000, unique = true, nullable = false)
     private String instructions;
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 }
