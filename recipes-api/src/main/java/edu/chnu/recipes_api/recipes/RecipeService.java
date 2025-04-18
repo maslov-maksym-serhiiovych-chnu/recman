@@ -12,8 +12,8 @@ public class RecipeService {
         this.recipeRepository = recipeRepository;
     }
 
-    public Recipe create(Recipe recipe) {
-        return recipeRepository.save(recipe);
+    public void create(Recipe recipe) {
+        recipeRepository.save(recipe);
     }
 
     public List<Recipe> readAll() {
