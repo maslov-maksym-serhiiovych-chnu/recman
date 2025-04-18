@@ -16,9 +16,10 @@ public class RecipeController {
     }
 
     @PostMapping
-    public ResponseEntity<Recipe> create(@RequestBody RecipeDTO recipeDTO) {
+    public ResponseEntity<RecipeDTO> create(@RequestBody RecipeDTO recipeDTO) {
         Recipe recipe = toEntity(recipeDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(recipeService.create(recipe));
+        recipeService.create(recipe);
+        return ResponseEntity.status(HttpStatus.CREATED).body(recipeDTO);
     }
 
     @GetMapping
