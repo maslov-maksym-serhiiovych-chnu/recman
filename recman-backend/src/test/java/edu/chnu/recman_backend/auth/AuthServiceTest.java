@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,6 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+@SpringBootTest
 class AuthServiceTest {
     private static final RegisterRequest REGISTER_REQUEST = new RegisterRequest("user", "password");
     private static final LoginRequest LOGIN_REQUEST = new LoginRequest("user", "password");
