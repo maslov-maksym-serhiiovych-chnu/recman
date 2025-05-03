@@ -1,0 +1,23 @@
+services:
+  recman-db:
+    container_name: recman-db
+    image: postgres:15
+    restart: always
+    volumes:
+      - recman-data:/var/lib/postgresql/data
+    networks:
+      - recman-network
+    environment:
+      POSTGRES_USER: recman-db
+      POSTGRES_PASSWORD: recman-db
+      POSTGRES_DB: recman-db
+    ports:
+      - "5432:5432"
+
+volumes:
+  recman-data:
+    name: recman-data
+
+networks:
+  recman-network:
+    name: recman-network
