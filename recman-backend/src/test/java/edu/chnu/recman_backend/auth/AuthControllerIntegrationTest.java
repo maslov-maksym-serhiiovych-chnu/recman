@@ -23,16 +23,16 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 class AuthControllerIntegrationTest {
     private static final RegisterRequest REGISTER_REQUEST = new RegisterRequest("user", "password");
     private static final LoginRequest LOGIN_REQUEST = new LoginRequest("user", "password");
-    
+
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
     private ObjectMapper mapper;
-    
+
     @Autowired
     private JdbcTemplate template;
-    
+
     @BeforeEach
     void setUp() {
         template.execute("TRUNCATE TABLE users");
