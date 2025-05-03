@@ -40,13 +40,13 @@ class AuthControllerIntegrationTest {
 
     @Test
     void register_thenLogin_successfully() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.post("/recman/auth/register")
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/recman/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(REGISTER_REQUEST)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.username").value("user"));
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/recman/auth/login")
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/recman/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(LOGIN_REQUEST)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -56,12 +56,12 @@ class AuthControllerIntegrationTest {
 
     @Test
     void register_sameUsername_shouldReturnConflict() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.post("/recman/auth/register")
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/recman/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(REGISTER_REQUEST)))
                 .andExpect(MockMvcResultMatchers.status().isOk());
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/recman/auth/register")
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/recman/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(LOGIN_REQUEST)))
                 .andExpect(MockMvcResultMatchers.status().isConflict())
