@@ -5,6 +5,7 @@ import edu.chnu.recman_backend.auth.dtos.LoginResponse;
 import edu.chnu.recman_backend.auth.dtos.RegisterRequest;
 import edu.chnu.recman_backend.auth.dtos.RegisterResponse;
 import edu.chnu.recman_backend.auth.services.AuthService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,12 +22,12 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<RegisterResponse> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterRequest request) {
         return ResponseEntity.ok(service.register(request));
     }
     
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(service.login(request));
     }
 }
