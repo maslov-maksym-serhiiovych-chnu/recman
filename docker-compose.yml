@@ -1,7 +1,7 @@
 services:
   recman-api:
     container_name: recman-api
-    image: recman-api
+    build: ./recman-backend
     networks:
       - recman-network
     env_file:
