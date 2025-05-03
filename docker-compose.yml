@@ -1,4 +1,16 @@
 services:
+  recman-api:
+    container_name: recman-api
+    image: recman-api
+    networks:
+      - recman-network
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    depends_on:
+      - recman-db
+  
   recman-db:
     container_name: recman-db
     image: postgres:15
@@ -7,10 +19,8 @@ services:
       - recman-data:/var/lib/postgresql/data
     networks:
       - recman-network
-    environment:
-      POSTGRES_USER: recman-db
-      POSTGRES_PASSWORD: recman-db
-      POSTGRES_DB: recman-db
+    env_file:
+      - .env
     ports:
       - "5432:5432"
 
