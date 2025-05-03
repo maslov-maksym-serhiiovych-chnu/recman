@@ -4,6 +4,7 @@ import edu.chnu.recman_backend.auth.dtos.LoginRequest;
 import edu.chnu.recman_backend.auth.dtos.LoginResponse;
 import edu.chnu.recman_backend.auth.dtos.RegisterRequest;
 import edu.chnu.recman_backend.auth.dtos.RegisterResponse;
+import edu.chnu.recman_backend.auth.exceptions.UsernameAlreadyExistsException;
 import edu.chnu.recman_backend.auth.models.Role;
 import edu.chnu.recman_backend.auth.models.User;
 import edu.chnu.recman_backend.auth.repositories.UserRepository;
@@ -27,6 +28,10 @@ public class AuthService {
     }
 
     public RegisterResponse register(RegisterRequest request) {
+        if (repository.existsByUsername(request.username())) {
+            throw new UsernameAlreadyExistsException("Username already exists");
+        }
+
         User user = new User();
         user.setUsername(request.username());
         user.setPassword(encoder.encode(request.password()));
