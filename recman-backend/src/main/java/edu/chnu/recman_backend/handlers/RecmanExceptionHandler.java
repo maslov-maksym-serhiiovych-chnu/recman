@@ -1,6 +1,8 @@
-package edu.chnu.recman_backend.auth.handlers;
+package edu.chnu.recman_backend.handlers;
 
 import edu.chnu.recman_backend.auth.exceptions.UsernameAlreadyExistsException;
+import edu.chnu.recman_backend.recipes.exceptions.RecipeAlreadyExistsException;
+import edu.chnu.recman_backend.recipes.exceptions.RecipeNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -12,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
-public class AuthExceptionHandler {
+public class RecmanExceptionHandler {
     @ExceptionHandler(UsernameAlreadyExistsException.class)
     public ResponseEntity<Map<String, String>> handleUsernameExists(UsernameAlreadyExistsException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", ex.getMessage()));
@@ -27,6 +29,16 @@ public class AuthExceptionHandler {
         }
 
         return ResponseEntity.badRequest().body(errors);
+    }
+
+    @ExceptionHandler(RecipeNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleRecipeNotFound(RecipeNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(RecipeAlreadyExistsException.class)
+    public ResponseEntity<Map<String, String>> handleRecipeAlreadyExists(RecipeAlreadyExistsException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", ex.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)
