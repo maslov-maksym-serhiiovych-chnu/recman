@@ -24,9 +24,7 @@ public class RecipeService {
     public RecipeDetails create(RecipeCreateRequest request) {
         validateName(request.name());
 
-        Recipe recipe = new Recipe();
-        recipe.setName(request.name());
-        recipe.setDescription(request.description());
+        Recipe recipe = new Recipe(request.name(), request.description());
 
         repository.save(recipe);
         return new RecipeDetails(recipe.getName(), recipe.getDescription());
