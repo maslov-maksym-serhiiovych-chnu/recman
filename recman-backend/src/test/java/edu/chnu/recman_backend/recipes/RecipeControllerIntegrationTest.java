@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.chnu.recman_backend.TestcontainersConfiguration;
 import edu.chnu.recman_backend.auth.dtos.LoginRequest;
 import edu.chnu.recman_backend.auth.dtos.RegisterRequest;
+import edu.chnu.recman_backend.auth.models.Role;
+import edu.chnu.recman_backend.auth.models.User;
 import edu.chnu.recman_backend.recipes.dtos.RecipeCreateRequest;
 import edu.chnu.recman_backend.recipes.dtos.RecipeUpdateRequest;
 import edu.chnu.recman_backend.recipes.models.Recipe;
@@ -26,6 +28,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 @SpringBootTest
 @AutoConfigureMockMvc
 class RecipeControllerIntegrationTest {
+    private static final User USER = new User("user", "password", Role.USER);
     private static final String REGISTER_URL = "/api/recman/auth/register";
     private static final RegisterRequest REGISTER_REQUEST = new RegisterRequest("user", "password");
     private static final String LOGIN_URL = "/api/recman/auth/login";
@@ -40,8 +43,8 @@ class RecipeControllerIntegrationTest {
     private static final RecipeUpdateRequest RECIPE_UPDATE_REQUEST =
             new RecipeUpdateRequest("Borscht", "New");
 
-    private final Recipe FIRST_RECIPE = new Recipe("Borscht", "Soup"),
-            SECOND_RECIPE = new Recipe("Varenyky", "Cheese");
+    private final Recipe FIRST_RECIPE = new Recipe("Borscht", "Soup", USER),
+            SECOND_RECIPE = new Recipe("Varenyky", "Cheese", USER);
 
     @Autowired
     private MockMvc mockMvc;
