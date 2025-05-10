@@ -32,18 +32,18 @@ public class RecipeController {
         return ResponseEntity.ok(service.readAll());
     }
 
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<RecipeDetails> read(@PathVariable Long id) {
         return ResponseEntity.ok(service.read(id));
     }
 
-    @PutMapping("{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<Void> update(@PathVariable Long id, @Valid @RequestBody RecipeUpdateRequest request) {
         service.update(id, request);
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
