@@ -13,11 +13,13 @@ import edu.chnu.recman_backend.auth.services.JwtService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.NoSuchElementException;
@@ -27,29 +29,30 @@ class AuthServiceTest {
     private static final RegisterRequest REGISTER_REQUEST = new RegisterRequest("user", "password");
     private static final LoginRequest LOGIN_REQUEST = new LoginRequest("user", "password");
     private static final String ENCODED_PASSWORD = "encoded-password";
-    
-    private static final UsernameAlreadyExistsException USERNAME_ALREADY_EXISTS_EXCEPTION =
-            new UsernameAlreadyExistsException();
-    
-    private static final User USER = new User("user", ENCODED_PASSWORD, Role.USER);
+    private static final User USER = new User("user", "password", Role.USER);
     private static final String TOKEN = "token";
-    
+
     private static final BadCredentialsException BAD_CREDENTIALS_EXCEPTION =
             new BadCredentialsException("Bad credentials");
 
+    @Mock
     private UserRepository repository;
+    
+    @Mock
     private JwtService jwtService;
+    
+    @Mock
     private AuthenticationManager authenticationManager;
+    
+    @Mock
     private PasswordEncoder encoder;
+
+    @InjectMocks
     private AuthService service;
 
     @BeforeEach
-    void setUp() {
-        repository = Mockito.mock(UserRepository.class);
-        jwtService = Mockito.mock(JwtService.class);
-        authenticationManager = Mockito.mock(AuthenticationManager.class);
-        encoder = Mockito.mock(PasswordEncoder.class);
-        service = new AuthService(repository, jwtService, authenticationManager, encoder);
+    void setUp() throws Exception {
+        MockitoAnnotations.openMocks(this).close();
     }
 
     @Test
@@ -73,7 +76,7 @@ class AuthServiceTest {
         UsernameAlreadyExistsException ex = Assertions.assertThrows(UsernameAlreadyExistsException.class, () ->
                 service.register(REGISTER_REQUEST));
 
-        Assertions.assertEquals(USERNAME_ALREADY_EXISTS_EXCEPTION.getMessage(), ex.getMessage());
+        Assertions.assertEquals(new UsernameAlreadyExistsException().getMessage(), ex.getMessage());
     }
 
     @Test
@@ -92,7 +95,6 @@ class AuthServiceTest {
 
     @Test
     void login_shouldThrowIfUserNotFound() {
-        Mockito.when(authenticationManager.authenticate(Mockito.any())).thenReturn(Mockito.mock(Authentication.class));
         Mockito.when(repository.findByUsername(USER.getUsername())).thenReturn(Optional.empty());
 
         Assertions.assertThrows(NoSuchElementException.class, () -> service.login(LOGIN_REQUEST));
@@ -102,9 +104,9 @@ class AuthServiceTest {
     void login_shouldThrowIfAuthenticationFails() {
         Mockito.doThrow(BAD_CREDENTIALS_EXCEPTION).when(authenticationManager).authenticate(Mockito.any());
 
-        BadCredentialsException ex = Assertions.assertThrows(BadCredentialsException.class, () -> 
+        BadCredentialsException ex = Assertions.assertThrows(BadCredentialsException.class, () ->
                 service.login(LOGIN_REQUEST));
-        
+
         Assertions.assertEquals(BAD_CREDENTIALS_EXCEPTION.getMessage(), ex.getMessage());
     }
 }
