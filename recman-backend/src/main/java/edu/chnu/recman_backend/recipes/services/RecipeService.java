@@ -4,7 +4,7 @@ import edu.chnu.recman_backend.recipes.dtos.RecipeCreateRequest;
 import edu.chnu.recman_backend.recipes.dtos.RecipeDetails;
 import edu.chnu.recman_backend.recipes.dtos.RecipeListItem;
 import edu.chnu.recman_backend.recipes.dtos.RecipeUpdateRequest;
-import edu.chnu.recman_backend.recipes.exceptions.RecipeAlreadyExistsException;
+import edu.chnu.recman_backend.recipes.exceptions.RecipeNameAlreadyExistsException;
 import edu.chnu.recman_backend.recipes.exceptions.RecipeNotFoundException;
 import edu.chnu.recman_backend.recipes.models.Recipe;
 import edu.chnu.recman_backend.recipes.repositories.RecipeRepository;
@@ -65,7 +65,7 @@ public class RecipeService {
 
     private void validateName(String name) {
         if (repository.existsByName(name)) {
-            throw new RecipeAlreadyExistsException();
+            throw new RecipeNameAlreadyExistsException();
         }
     }
 }
