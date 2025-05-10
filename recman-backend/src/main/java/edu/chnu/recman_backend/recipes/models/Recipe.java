@@ -1,28 +1,34 @@
 package edu.chnu.recman_backend.recipes.models;
 
+import edu.chnu.recman_backend.auth.models.User;
 import jakarta.persistence.*;
 import org.hibernate.annotations.Check;
 
 @Entity
-@Table(name = "recipes")
+@Table(name = "recipes", uniqueConstraints = @UniqueConstraint(columnNames = {"name", "user_id"}))
 @Check(constraints = "char_length(name) >= 3")
 public class Recipe {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 50, unique = true, nullable = false)
+    @Column(length = 50, nullable = false)
     private String name;
 
     @Column(nullable = false)
     private String description;
-    
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     public Recipe() {
     }
 
-    public Recipe(String name, String description) {
+    public Recipe(String name, String description, User user) {
         this.name = name;
         this.description = description;
+        this.user = user;
     }
 
     public Long getId() {
@@ -47,5 +53,13 @@ public class Recipe {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

@@ -10,6 +10,8 @@ import edu.chnu.recman_backend.auth.models.User;
 import edu.chnu.recman_backend.auth.repositories.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -44,5 +46,12 @@ public class AuthService {
 
         User user = repository.findByUsername(request.username()).orElseThrow();
         return new LoginResponse(jwtService.generateToken(user));
+    }
+
+    public User getCurrentUser() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        
+        return repository.findByUsername(username).orElseThrow(() ->
+                new UsernameNotFoundException("Username not found"));
     }
 }
