@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.chnu.recman_backend.TestcontainersConfiguration;
 import edu.chnu.recman_backend.auth.dtos.LoginRequest;
 import edu.chnu.recman_backend.auth.dtos.RegisterRequest;
+import edu.chnu.recman_backend.auth.exceptions.UsernameAlreadyExistsException;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -21,8 +23,19 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 @SpringBootTest
 @AutoConfigureMockMvc
 class AuthControllerIntegrationTest {
+    private static final String REGISTER_URL = "/api/recman/auth/register";
     private static final RegisterRequest REGISTER_REQUEST = new RegisterRequest("user", "password");
+    private static final String LOGIN_URL = "/api/recman/auth/login";
     private static final LoginRequest LOGIN_REQUEST = new LoginRequest("user", "password");
+    
+    private static final UsernameAlreadyExistsException USERNAME_ALREADY_EXISTS_EXCEPTION = 
+            new UsernameAlreadyExistsException();
+    
+    private static final LoginRequest INVALID_LOGIN_REQUEST = 
+            new LoginRequest("user", "wrong-password");
+    
+    private static final BadCredentialsException BAD_CREDENTIALS_EXCEPTION = 
+            new BadCredentialsException("Bad credentials");
 
     @Autowired
     private MockMvc mockMvc;
@@ -35,18 +48,18 @@ class AuthControllerIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        template.execute("TRUNCATE TABLE users");
+        template.execute("TRUNCATE TABLE users RESTART IDENTITY CASCADE");
     }
 
     @Test
     void register_thenLogin_successfully() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/recman/auth/register")
+        mockMvc.perform(MockMvcRequestBuilders.post(REGISTER_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(REGISTER_REQUEST)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.username").value("user"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.username").value(REGISTER_REQUEST.username()));
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/recman/auth/login")
+        mockMvc.perform(MockMvcRequestBuilders.post(LOGIN_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(LOGIN_REQUEST)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -56,15 +69,31 @@ class AuthControllerIntegrationTest {
 
     @Test
     void register_sameUsername_shouldReturnConflict() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/recman/auth/register")
+        mockMvc.perform(MockMvcRequestBuilders.post(REGISTER_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(REGISTER_REQUEST)))
                 .andExpect(MockMvcResultMatchers.status().isOk());
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/recman/auth/register")
+        mockMvc.perform(MockMvcRequestBuilders.post(REGISTER_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(LOGIN_REQUEST)))
                 .andExpect(MockMvcResultMatchers.status().isConflict())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.error").value("Username already exists"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error")
+                        .value(USERNAME_ALREADY_EXISTS_EXCEPTION.getMessage()));
+    }
+
+    @Test
+    void login_withInvalidCredentials_shouldReturnUnauthorized() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.post(REGISTER_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(REGISTER_REQUEST)))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+
+        mockMvc.perform(MockMvcRequestBuilders.post(LOGIN_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(INVALID_LOGIN_REQUEST)))
+                .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error")
+                        .value(BAD_CREDENTIALS_EXCEPTION.getMessage()));
     }
 }

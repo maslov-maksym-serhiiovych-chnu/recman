@@ -1,6 +1,7 @@
 package edu.chnu.recman_backend.auth.models;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.Check;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,18 +11,30 @@ import java.util.List;
 
 @Entity
 @Table(name = "users")
+@Check(constraints = "char_length(username) >= 3 AND char_length(password) >= 8")
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 50, unique = true)
+    @Column(length = 50, unique = true, nullable = false)
     private String username;
 
+    @Column(nullable = false)
     private String password;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Role role;
+
+    public User() {
+    }
+    
+    public User(String username, String password, Role role) {
+        this.username = username;
+        this.password = password;
+        this.role = role;
+    }
 
     public Long getId() {
         return id;
