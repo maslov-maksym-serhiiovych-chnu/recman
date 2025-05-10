@@ -1,9 +1,11 @@
 package edu.chnu.recman_backend.recipes.models;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.Check;
 
 @Entity
 @Table(name = "recipes")
+@Check(constraints = "char_length(name) >= 3")
 public class Recipe {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

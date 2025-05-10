@@ -1,7 +1,7 @@
 package edu.chnu.recman_backend.handlers;
 
 import edu.chnu.recman_backend.auth.exceptions.UsernameAlreadyExistsException;
-import edu.chnu.recman_backend.recipes.exceptions.RecipeAlreadyExistsException;
+import edu.chnu.recman_backend.recipes.exceptions.RecipeNameAlreadyExistsException;
 import edu.chnu.recman_backend.recipes.exceptions.RecipeNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,8 +42,8 @@ public class RecmanExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
     }
 
-    @ExceptionHandler(RecipeAlreadyExistsException.class)
-    public ResponseEntity<Map<String, String>> handleRecipeAlreadyExists(RecipeAlreadyExistsException ex) {
+    @ExceptionHandler(RecipeNameAlreadyExistsException.class)
+    public ResponseEntity<Map<String, String>> handleRecipeNameExists(RecipeNameAlreadyExistsException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", ex.getMessage()));
     }
 

@@ -3,8 +3,11 @@ package edu.chnu.recman_backend.recipes;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.chnu.recman_backend.TestcontainersConfiguration;
+import edu.chnu.recman_backend.auth.dtos.LoginRequest;
+import edu.chnu.recman_backend.auth.dtos.RegisterRequest;
 import edu.chnu.recman_backend.recipes.dtos.RecipeCreateRequest;
 import edu.chnu.recman_backend.recipes.dtos.RecipeUpdateRequest;
+import edu.chnu.recman_backend.recipes.models.Recipe;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +26,23 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 @SpringBootTest
 @AutoConfigureMockMvc
 class RecipeControllerIntegrationTest {
+    private static final String REGISTER_URL = "/api/recman/auth/register";
+    private static final RegisterRequest REGISTER_REQUEST = new RegisterRequest("user", "password");
+    private static final String LOGIN_URL = "/api/recman/auth/login";
+    private static final LoginRequest LOGIN_REQUEST = new LoginRequest("user", "password");
+    private static final String RECIPES_URL = "/api/recman/recipes";
+
+    private static final RecipeCreateRequest RECIPE_CREATE_REQUEST =
+            new RecipeCreateRequest("Borscht", "Soup");
+
+    private static final Long RECIPE_ID = 1L, SECOND_RECIPE_ID = 2L;
+
+    private static final RecipeUpdateRequest RECIPE_UPDATE_REQUEST =
+            new RecipeUpdateRequest("Borscht", "New");
+
+    private final Recipe FIRST_RECIPE = new Recipe("Borscht", "Soup"),
+            SECOND_RECIPE = new Recipe("Varenyky", "Cheese");
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -39,24 +59,14 @@ class RecipeControllerIntegrationTest {
         template.execute("TRUNCATE TABLE recipes RESTART IDENTITY CASCADE");
         template.execute("TRUNCATE TABLE users RESTART IDENTITY CASCADE");
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/recman/auth/register")
+        mockMvc.perform(MockMvcRequestBuilders.post(REGISTER_URL)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                    {
-                                        "username": "user",
-                                        "password": "password"
-                                    }
-                                """))
+                        .content(mapper.writeValueAsString(REGISTER_REQUEST)))
                 .andExpect(MockMvcResultMatchers.status().isOk());
 
-        MvcResult loginResult = mockMvc.perform(MockMvcRequestBuilders.post("/api/recman/auth/login")
+        MvcResult loginResult = mockMvc.perform(MockMvcRequestBuilders.post(LOGIN_URL)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                    {
-                                        "username": "user",
-                                        "password": "password"
-                                    }
-                                """))
+                        .content(mapper.writeValueAsString(LOGIN_REQUEST)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn();
 
@@ -67,107 +77,101 @@ class RecipeControllerIntegrationTest {
 
     @Test
     void createRecipe_returnsCreatedRecipe() throws Exception {
-        RecipeCreateRequest request = new RecipeCreateRequest("Borscht", "Ukrainian soup");
 
-        mockMvc.perform(authorized(MockMvcRequestBuilders.post("/api/recman/recipes"))
+        mockMvc.perform(authorized(MockMvcRequestBuilders.post(RECIPES_URL))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(request)))
+                        .content(mapper.writeValueAsString(RECIPE_CREATE_REQUEST)))
                 .andExpect(MockMvcResultMatchers.status().isCreated())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Borscht"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.description").value("Ukrainian soup"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value(RECIPE_CREATE_REQUEST.name()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.description")
+                        .value(RECIPE_CREATE_REQUEST.description()));
     }
 
     @Test
     void readAllRecipes_returnsEmptyListInitially() throws Exception {
-        mockMvc.perform(authorized(MockMvcRequestBuilders.get("/api/recman/recipes")))
+        mockMvc.perform(authorized(MockMvcRequestBuilders.get(RECIPES_URL)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().json("[]"));
     }
 
     @Test
     void readRecipeById_returnsCorrectRecipe() throws Exception {
-        RecipeCreateRequest request = new RecipeCreateRequest("Borscht", "Ukrainian soup");
-        mockMvc.perform(authorized(MockMvcRequestBuilders.post("/api/recman/recipes"))
+        mockMvc.perform(authorized(MockMvcRequestBuilders.post(RECIPES_URL))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(request)))
+                        .content(mapper.writeValueAsString(RECIPE_CREATE_REQUEST)))
                 .andExpect(MockMvcResultMatchers.status().isCreated());
 
-        mockMvc.perform(authorized(MockMvcRequestBuilders.get("/api/recman/recipes/1")))
+        mockMvc.perform(authorized(MockMvcRequestBuilders.get(RECIPES_URL + "/" + RECIPE_ID)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Borscht"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.description").value("Ukrainian soup"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value(RECIPE_CREATE_REQUEST.name()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.description")
+                        .value(RECIPE_CREATE_REQUEST.description()));
     }
 
     @Test
     void updateRecipe_updatesFields() throws Exception {
-        RecipeCreateRequest request = new RecipeCreateRequest("Borscht", "Ukrainian soup");
-        mockMvc.perform(authorized(MockMvcRequestBuilders.post("/api/recman/recipes"))
+        mockMvc.perform(authorized(MockMvcRequestBuilders.post(RECIPES_URL))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(request)))
+                        .content(mapper.writeValueAsString(RECIPE_CREATE_REQUEST)))
                 .andExpect(MockMvcResultMatchers.status().isCreated());
 
-        RecipeUpdateRequest updateRequest = new RecipeUpdateRequest("Green Borscht", "With sorrel");
 
-        mockMvc.perform(authorized(MockMvcRequestBuilders.put("/api/recman/recipes/1"))
+        mockMvc.perform(authorized(MockMvcRequestBuilders.put(RECIPES_URL + "/" + RECIPE_ID))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(updateRequest)))
+                        .content(mapper.writeValueAsString(RECIPE_UPDATE_REQUEST)))
                 .andExpect(MockMvcResultMatchers.status().isNoContent());
 
-        mockMvc.perform(authorized(MockMvcRequestBuilders.get("/api/recman/recipes/1")))
+        mockMvc.perform(authorized(MockMvcRequestBuilders.get(RECIPES_URL + "/" + RECIPE_ID)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Green Borscht"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.description").value("With sorrel"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value(RECIPE_UPDATE_REQUEST.name()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.description")
+                        .value(RECIPE_UPDATE_REQUEST.description()));
     }
 
     @Test
     void deleteRecipe_removesIt() throws Exception {
-        RecipeCreateRequest request = new RecipeCreateRequest("Borscht", "Ukrainian soup");
-        mockMvc.perform(authorized(MockMvcRequestBuilders.post("/api/recman/recipes")
+        mockMvc.perform(authorized(MockMvcRequestBuilders.post(RECIPES_URL)
                 ).contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(request)))
+                        .content(mapper.writeValueAsString(RECIPE_CREATE_REQUEST)))
                 .andExpect(MockMvcResultMatchers.status().isCreated());
 
-        mockMvc.perform(authorized(MockMvcRequestBuilders.delete("/api/recman/recipes/1")))
+        mockMvc.perform(authorized(MockMvcRequestBuilders.delete(RECIPES_URL + "/" + RECIPE_ID)))
                 .andExpect(MockMvcResultMatchers.status().isNoContent());
 
-        mockMvc.perform(authorized(MockMvcRequestBuilders.get("/api/recman/recipes/1")))
+        mockMvc.perform(authorized(MockMvcRequestBuilders.get(RECIPES_URL + "/" + RECIPE_ID)))
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
     @Test
     void creatingDuplicateName_returnsConflict() throws Exception {
-        RecipeCreateRequest request = new RecipeCreateRequest("Borscht", "Ukrainian soup");
 
-        mockMvc.perform(authorized(MockMvcRequestBuilders.post("/api/recman/recipes"))
+        mockMvc.perform(authorized(MockMvcRequestBuilders.post(RECIPES_URL))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(request)))
+                        .content(mapper.writeValueAsString(RECIPE_CREATE_REQUEST)))
                 .andExpect(MockMvcResultMatchers.status().isCreated());
 
-        mockMvc.perform(authorized(MockMvcRequestBuilders.post("/api/recman/recipes"))
+        mockMvc.perform(authorized(MockMvcRequestBuilders.post(RECIPES_URL))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(request)))
+                        .content(mapper.writeValueAsString(RECIPE_CREATE_REQUEST)))
                 .andExpect(MockMvcResultMatchers.status().isConflict())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.error").exists());
     }
 
     @Test
     void updateRecipe_withDuplicateName_returnsConflict() throws Exception {
-        RecipeCreateRequest first = new RecipeCreateRequest("Borscht", "Ukrainian soup");
-        mockMvc.perform(authorized(MockMvcRequestBuilders.post("/api/recman/recipes"))
+        mockMvc.perform(authorized(MockMvcRequestBuilders.post(RECIPES_URL))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(first)))
+                        .content(mapper.writeValueAsString(FIRST_RECIPE)))
                 .andExpect(MockMvcResultMatchers.status().isCreated());
 
-        RecipeCreateRequest second = new RecipeCreateRequest("Varenyky", "Ukrainian dumplings");
-        mockMvc.perform(authorized(MockMvcRequestBuilders.post("/api/recman/recipes"))
+        mockMvc.perform(authorized(MockMvcRequestBuilders.post(RECIPES_URL))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(second)))
+                        .content(mapper.writeValueAsString(SECOND_RECIPE)))
                 .andExpect(MockMvcResultMatchers.status().isCreated());
 
-        RecipeUpdateRequest updateRequest = new RecipeUpdateRequest("Borscht", "Now it's soup too");
-        mockMvc.perform(authorized(MockMvcRequestBuilders.put("/api/recman/recipes/2"))
+        mockMvc.perform(authorized(MockMvcRequestBuilders.put(RECIPES_URL + "/" + SECOND_RECIPE_ID))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(updateRequest)))
+                        .content(mapper.writeValueAsString(RECIPE_UPDATE_REQUEST)))
                 .andExpect(MockMvcResultMatchers.status().isConflict())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.error").exists());
     }
