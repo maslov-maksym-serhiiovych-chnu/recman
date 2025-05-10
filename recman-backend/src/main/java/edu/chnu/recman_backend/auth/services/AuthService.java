@@ -20,7 +20,8 @@ public class AuthService {
     private final AuthenticationManager manager;
     private final PasswordEncoder encoder;
 
-    public AuthService(UserRepository repository, JwtService jwtService, AuthenticationManager manager, PasswordEncoder encoder) {
+    public AuthService(UserRepository repository, JwtService jwtService, AuthenticationManager manager,
+                       PasswordEncoder encoder) {
         this.repository = repository;
         this.jwtService = jwtService;
         this.manager = manager;
@@ -29,13 +30,10 @@ public class AuthService {
 
     public RegisterResponse register(RegisterRequest request) {
         if (repository.existsByUsername(request.username())) {
-            throw new UsernameAlreadyExistsException("Username already exists");
+            throw new UsernameAlreadyExistsException();
         }
 
-        User user = new User();
-        user.setUsername(request.username());
-        user.setPassword(encoder.encode(request.password()));
-        user.setRole(Role.USER);
+        User user = new User(request.username(), encoder.encode(request.password()), Role.USER);
 
         repository.save(user);
         return new RegisterResponse(user.getUsername());
