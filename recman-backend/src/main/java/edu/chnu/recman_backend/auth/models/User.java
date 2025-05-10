@@ -1,5 +1,6 @@
 package edu.chnu.recman_backend.auth.models;
 
+import edu.chnu.recman_backend.recipes.models.Recipe;
 import jakarta.persistence.*;
 import org.hibernate.annotations.Check;
 import org.springframework.security.core.GrantedAuthority;
@@ -27,9 +28,12 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Role role;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Recipe> recipes;
+
     public User() {
     }
-    
+
     public User(String username, String password, Role role) {
         this.username = username;
         this.password = password;
@@ -68,6 +72,14 @@ public class User implements UserDetails {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    public List<Recipe> getRecipes() {
+        return recipes;
+    }
+
+    public void setRecipes(List<Recipe> recipes) {
+        this.recipes = recipes;
     }
 
     @Override
