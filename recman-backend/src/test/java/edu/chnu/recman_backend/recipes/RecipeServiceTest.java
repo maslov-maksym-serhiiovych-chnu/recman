@@ -3,7 +3,7 @@ package edu.chnu.recman_backend.recipes;
 import edu.chnu.recman_backend.recipes.dtos.RecipeCreateRequest;
 import edu.chnu.recman_backend.recipes.dtos.RecipeDetails;
 import edu.chnu.recman_backend.recipes.dtos.RecipeUpdateRequest;
-import edu.chnu.recman_backend.recipes.exceptions.RecipeAlreadyExistsException;
+import edu.chnu.recman_backend.recipes.exceptions.RecipeNameAlreadyExistsException;
 import edu.chnu.recman_backend.recipes.exceptions.RecipeNotFoundException;
 import edu.chnu.recman_backend.recipes.models.Recipe;
 import edu.chnu.recman_backend.recipes.repositories.RecipeRepository;
@@ -17,6 +17,24 @@ import java.util.List;
 import java.util.Optional;
 
 class RecipeServiceTest {
+    private static final RecipeCreateRequest RECIPE_CREATE_REQUEST =
+            new RecipeCreateRequest("Borscht", "Soup");
+
+    private static final RecipeNameAlreadyExistsException RECIPE_NAME_ALREADY_EXISTS_EXCEPTION =
+            new RecipeNameAlreadyExistsException();
+
+    private static final Long RECIPE_ID = 1L;
+    private static final RecipeNotFoundException RECIPE_NOT_FOUND_EXCEPTION = new RecipeNotFoundException();
+    private static final RecipeUpdateRequest RECIPE_UPDATE_REQUEST =
+            new RecipeUpdateRequest("New", "New");
+
+    private static final List<Recipe> RECIPES = List.of(
+            new Recipe("Borscht", "Soup"),
+            new Recipe("Varenyky", "Cheese")
+    );
+
+    private final Recipe RECIPE = new Recipe("Borscht", "Soup");
+
     private RecipeRepository repository;
     private RecipeService service;
 
@@ -28,113 +46,112 @@ class RecipeServiceTest {
 
     @Test
     void create_ShouldCreateRecipe_WhenNameIsUnique() {
-        RecipeCreateRequest request = new RecipeCreateRequest("Borscht", "Traditional beet soup");
+        Mockito.when(repository.existsByName(RECIPE_CREATE_REQUEST.name())).thenReturn(false);
+        Mockito.when(repository.save(Mockito.any(Recipe.class))).thenAnswer(inv ->
+                inv.getArgument(0));
 
-        Mockito.when(repository.existsByName("Borscht")).thenReturn(false);
-        Mockito.when(repository.save(Mockito.any(Recipe.class))).thenAnswer(inv -> inv.getArgument(0));
+        RecipeDetails result = service.create(RECIPE_CREATE_REQUEST);
 
-        RecipeDetails result = service.create(request);
-
-        Assertions.assertEquals("Borscht", result.name());
-        Assertions.assertEquals("Traditional beet soup", result.description());
+        Assertions.assertEquals(RECIPE_CREATE_REQUEST.name(), result.name());
+        Assertions.assertEquals(RECIPE_CREATE_REQUEST.description(), result.description());
         Mockito.verify(repository).save(Mockito.any(Recipe.class));
     }
 
     @Test
     void create_ShouldThrow_WhenNameAlreadyExists() {
-        RecipeCreateRequest request = new RecipeCreateRequest("Borscht", "Soup");
+        Mockito.when(repository.existsByName(RECIPE_CREATE_REQUEST.name())).thenReturn(true);
 
-        Mockito.when(repository.existsByName("Borscht")).thenReturn(true);
+        RecipeNameAlreadyExistsException ex = Assertions.assertThrows(RecipeNameAlreadyExistsException.class, () ->
+                service.create(RECIPE_CREATE_REQUEST));
 
-        Assertions.assertThrows(RecipeAlreadyExistsException.class, () -> service.create(request));
+        Assertions.assertEquals(RECIPE_NAME_ALREADY_EXISTS_EXCEPTION.getMessage(), ex.getMessage());
     }
 
     @Test
     void read_ShouldReturnRecipeDetails_WhenFound() {
-        Recipe recipe = new Recipe("Borscht", "Soup");
+        Mockito.when(repository.findById(RECIPE_ID)).thenReturn(Optional.of(RECIPE));
 
-        Mockito.when(repository.findById(1L)).thenReturn(Optional.of(recipe));
+        RecipeDetails result = service.read(RECIPE_ID);
 
-        RecipeDetails result = service.read(1L);
-
-        Assertions.assertEquals("Borscht", result.name());
-        Assertions.assertEquals("Soup", result.description());
+        Assertions.assertEquals(RECIPE.getName(), result.name());
+        Assertions.assertEquals(RECIPE.getDescription(), result.description());
     }
 
     @Test
     void read_ShouldThrow_WhenNotFound() {
-        Mockito.when(repository.findById(1L)).thenReturn(Optional.empty());
+        Mockito.when(repository.findById(RECIPE_ID)).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(RecipeNotFoundException.class, () -> service.read(1L));
+        RecipeNotFoundException ex = Assertions.assertThrows(RecipeNotFoundException.class, () ->
+                service.read(RECIPE_ID));
+
+        Assertions.assertEquals(RECIPE_NOT_FOUND_EXCEPTION.getMessage(), ex.getMessage());
     }
 
     @Test
     void update_ShouldUpdateNameAndDescription_WhenValid() {
-        Recipe recipe = new Recipe("Old", "Old desc");
+        Mockito.when(repository.findById(RECIPE_ID)).thenReturn(Optional.of(RECIPE));
+        Mockito.when(repository.existsByName(RECIPE_UPDATE_REQUEST.name())).thenReturn(false);
+        Mockito.when(repository.save(Mockito.any(Recipe.class))).thenAnswer(inv ->
+                inv.getArgument(0));
 
-        RecipeUpdateRequest request = new RecipeUpdateRequest("New", "New desc");
+        service.update(RECIPE_ID, RECIPE_UPDATE_REQUEST);
 
-        Mockito.when(repository.findById(1L)).thenReturn(Optional.of(recipe));
-        Mockito.when(repository.existsByName("New")).thenReturn(false);
-        Mockito.when(repository.save(Mockito.any(Recipe.class))).thenAnswer(inv -> inv.getArgument(0));
-
-        service.update(1L, request);
-
-        Assertions.assertEquals("New", recipe.getName());
-        Assertions.assertEquals("New desc", recipe.getDescription());
-        Mockito.verify(repository).save(recipe);
+        Assertions.assertEquals(RECIPE_UPDATE_REQUEST.name(), RECIPE.getName());
+        Assertions.assertEquals(RECIPE_UPDATE_REQUEST.description(), RECIPE.getDescription());
+        Mockito.verify(repository).save(RECIPE);
     }
 
     @Test
     void update_ShouldThrow_WhenNewNameAlreadyExists() {
-        Recipe recipe = new Recipe("Old", "Desc");
+        Mockito.when(repository.findById(RECIPE_ID)).thenReturn(Optional.of(RECIPE));
+        Mockito.when(repository.existsByName(RECIPE_UPDATE_REQUEST.name())).thenReturn(true);
 
-        RecipeUpdateRequest request = new RecipeUpdateRequest("New", null);
+        System.out.println(RECIPE.getName());
+        System.out.println(RECIPE_UPDATE_REQUEST.name());
 
-        Mockito.when(repository.findById(1L)).thenReturn(Optional.of(recipe));
-        Mockito.when(repository.existsByName("New")).thenReturn(true);
+        RecipeNameAlreadyExistsException ex = Assertions.assertThrows(RecipeNameAlreadyExistsException.class, () ->
+                service.update(RECIPE_ID, RECIPE_UPDATE_REQUEST));
 
-        Assertions.assertThrows(RecipeAlreadyExistsException.class, () -> service.update(1L, request));
+        Assertions.assertEquals(RECIPE_NAME_ALREADY_EXISTS_EXCEPTION.getMessage(), ex.getMessage());
     }
 
     @Test
     void update_ShouldThrow_WhenNotFound() {
-        RecipeUpdateRequest request = new RecipeUpdateRequest("New", "Desc");
+        Mockito.when(repository.findById(RECIPE_ID)).thenReturn(Optional.empty());
 
-        Mockito.when(repository.findById(1L)).thenReturn(Optional.empty());
+        RecipeNotFoundException ex = Assertions.assertThrows(RecipeNotFoundException.class, () ->
+                service.update(RECIPE_ID, RECIPE_UPDATE_REQUEST));
 
-        Assertions.assertThrows(RecipeNotFoundException.class, () -> service.update(1L, request));
+        Assertions.assertEquals(RECIPE_NOT_FOUND_EXCEPTION.getMessage(), ex.getMessage());
     }
 
     @Test
     void delete_ShouldRemoveRecipe_WhenFound() {
-        Recipe recipe = new Recipe("ToDelete", "Desc");
+        Mockito.when(repository.findById(RECIPE_ID)).thenReturn(Optional.of(RECIPE));
 
-        Mockito.when(repository.findById(1L)).thenReturn(Optional.of(recipe));
+        service.delete(RECIPE_ID);
 
-        service.delete(1L);
-
-        Mockito.verify(repository).delete(recipe);
+        Mockito.verify(repository).delete(RECIPE);
     }
 
     @Test
     void delete_ShouldThrow_WhenNotFound() {
-        Mockito.when(repository.findById(1L)).thenReturn(Optional.empty());
+        Mockito.when(repository.findById(RECIPE_ID)).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(RecipeNotFoundException.class, () -> service.delete(1L));
+        RecipeNotFoundException ex = Assertions.assertThrows(RecipeNotFoundException.class, () ->
+                service.delete(RECIPE_ID));
+
+        Assertions.assertEquals(RECIPE_NOT_FOUND_EXCEPTION.getMessage(), ex.getMessage());
     }
 
     @Test
     void readAll_ShouldReturnListOfRecipeListItems() {
-        Recipe firstRecipe = new Recipe("Borscht", "Desc"),
-                secondRecipe = new Recipe("Varenyky", "Desc");
-
-        Mockito.when(repository.findAll()).thenReturn(List.of(firstRecipe, secondRecipe));
+        Mockito.when(repository.findAll()).thenReturn(RECIPES);
 
         var result = service.readAll();
 
-        Assertions.assertEquals(2, result.size());
-        Assertions.assertEquals("Borscht", result.get(0).name());
-        Assertions.assertEquals("Varenyky", result.get(1).name());
+        Assertions.assertEquals(RECIPES.size(), result.size());
+        Assertions.assertEquals(RECIPES.getFirst().getName(), result.getFirst().name());
+        Assertions.assertEquals(RECIPES.getLast().getName(), result.getLast().name());
     }
 }
