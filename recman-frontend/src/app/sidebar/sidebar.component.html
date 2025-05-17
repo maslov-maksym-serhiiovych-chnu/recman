@@ -1,0 +1,24 @@
+<aside class="w-64 h-full p-4 flex flex-col bg-black text-white">
+  <div class="mb-10" (click)="navigateToRecipes()">
+    <img ngSrc="logo.svg" alt="Logo" width="64" height="64"/>
+  </div>
+
+  <nav>
+    <ul class="space-y-2">
+      <li>
+        <a [routerLink]="['/recipes']"
+           class="px-2 py-2 flex items-center hover:bg-gray-900 rounded-md text-base font-medium text-blue-300 hover:text-blue-400">
+          <img ngSrc="recipes.svg" alt="Recipes" width="28" height="28" class="mr-4"/>
+          Recipes
+        </a>
+      </li>
+      <li>
+        <a (click)="logout()"
+           class="px-2 py-2 flex items-center hover:bg-gray-900 rounded-md text-base font-medium text-blue-300 hover:text-blue-400">
+          <img ngSrc="log-out.svg" alt="Log out" width="28" height="28" class="mr-4"/>
+          Log out
+        </a>
+      </li>
+    </ul>
+  </nav>
+</aside>

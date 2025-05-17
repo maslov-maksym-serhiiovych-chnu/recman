@@ -1,0 +1,41 @@
+<div class="p-6 text-white">
+  <div class="flex justify-between items-center mb-6">
+    <h2 class="text-2xl font-bold">Recipes</h2>
+    <button (click)="showForm = true" class="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700">+ Add Recipe</button>
+  </div>
+
+  <ul class="space-y-2 mb-6">
+    <li *ngFor="let recipe of recipes" class="p-4 bg-gray-800 rounded flex justify-between items-center">
+      <span (click)="selectRecipe(recipe)" class="cursor-pointer hover:underline">{{ recipe.name }}</span>
+      <div class="space-x-2">
+        <button (click)="editRecipe(recipe)" class="text-yellow-400 hover:underline">Edit</button>
+        <button (click)="deleteRecipe(recipe)" class="text-red-400 hover:underline">Delete</button>
+      </div>
+    </li>
+  </ul>
+
+  <div *ngIf="showForm" class="p-4 bg-gray-900 rounded">
+    <form [formGroup]="recipeForm" (ngSubmit)="onSubmit()">
+      <div class="mb-4">
+        <label class="block mb-1">Name</label>
+        <input type="text" formControlName="name" class="w-full p-2 rounded bg-gray-700 text-white"/>
+      </div>
+      <div class="mb-4">
+        <label class="block mb-1">Description</label>
+        <textarea formControlName="description" class="w-full p-2 rounded bg-gray-700 text-white"></textarea>
+      </div>
+      <div class="flex space-x-4">
+        <button type="submit" class="bg-green-600 px-4 py-2 rounded hover:bg-green-700">
+          {{ editingId ? 'Update' : 'Create' }}
+        </button>
+        <button type="button" (click)="cancel()" class="bg-gray-600 px-4 py-2 rounded hover:bg-gray-700">Cancel</button>
+      </div>
+    </form>
+  </div>
+
+  <div *ngIf="selectedRecipe" class="mt-6 p-4 bg-gray-800 rounded">
+    <h3 class="text-xl font-semibold mb-2">Details</h3>
+    <p><strong>Name:</strong> {{ selectedRecipe.name }}</p>
+    <p><strong>Description:</strong> {{ selectedRecipe.description }}</p>
+  </div>
+</div>

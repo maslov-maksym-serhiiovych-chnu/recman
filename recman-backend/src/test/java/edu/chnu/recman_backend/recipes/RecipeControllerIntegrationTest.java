@@ -80,7 +80,6 @@ class RecipeControllerIntegrationTest {
 
     @Test
     void createRecipe_returnsCreatedRecipe() throws Exception {
-
         mockMvc.perform(authorized(MockMvcRequestBuilders.post(RECIPES_URL))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(RECIPE_CREATE_REQUEST)))
