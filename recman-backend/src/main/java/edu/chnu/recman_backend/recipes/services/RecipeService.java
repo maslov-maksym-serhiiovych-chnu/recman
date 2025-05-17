@@ -28,8 +28,8 @@ public class RecipeService {
         validateName(request.name(), user);
 
         Recipe recipe = new Recipe(request.name(), request.description(), user);
-
         repository.save(recipe);
+
         return new RecipeDetails(recipe.getName(), recipe.getDescription());
     }
 
@@ -70,7 +70,6 @@ public class RecipeService {
         User user = authService.getCurrentUser();
 
         Recipe recipe = repository.findByIdAndUser(id, user).orElseThrow(RecipeNotFoundException::new);
-
         repository.delete(recipe);
     }
 

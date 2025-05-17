@@ -17,9 +17,9 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
+    private final AuthenticationManager authenticationManager;
     private final UserRepository repository;
     private final JwtService jwtService;
-    private final AuthenticationManager manager;
     private final PasswordEncoder encoder;
 
     public void register(RegisterRequest request) {
@@ -28,12 +28,11 @@ public class AuthService {
         }
 
         User user = new User(request.username(), encoder.encode(request.password()), Role.USER);
-
         repository.save(user);
     }
 
     public String login(LoginRequest request) {
-        manager.authenticate(new UsernamePasswordAuthenticationToken(request.username(), request.password()));
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.username(), request.password()));
 
         User user = repository.findByUsername(request.username()).orElseThrow();
         return jwtService.generateToken(user);
@@ -41,7 +40,7 @@ public class AuthService {
 
     public User getCurrentUser() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        
+
         return repository.findByUsername(username).orElseThrow(() ->
                 new UsernameNotFoundException("Username not found"));
     }

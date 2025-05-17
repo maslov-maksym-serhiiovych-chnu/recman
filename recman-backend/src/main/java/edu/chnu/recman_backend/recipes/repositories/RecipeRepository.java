@@ -11,8 +11,8 @@ import java.util.Optional;
 @Repository
 public interface RecipeRepository extends JpaRepository<Recipe, Long> {
     boolean existsByNameAndUser(String name, User user);
-    
+
     List<Recipe> findAllByUser(User user);
-    
+
     Optional<Recipe> findByIdAndUser(Long id, User user);
 }
