@@ -6,6 +6,7 @@ import edu.chnu.recman_backend.recipes.dtos.RecipeListItem;
 import edu.chnu.recman_backend.recipes.dtos.RecipeUpdateRequest;
 import edu.chnu.recman_backend.recipes.services.RecipeService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,12 +15,9 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/recman/recipes")
+@RequiredArgsConstructor
 public class RecipeController {
     private final RecipeService service;
-
-    public RecipeController(RecipeService service) {
-        this.service = service;
-    }
 
     @PostMapping
     public ResponseEntity<RecipeDetails> create(@Valid @RequestBody RecipeCreateRequest request) {

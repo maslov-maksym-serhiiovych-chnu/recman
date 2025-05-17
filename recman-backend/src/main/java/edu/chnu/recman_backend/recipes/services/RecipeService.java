@@ -10,20 +10,17 @@ import edu.chnu.recman_backend.recipes.exceptions.RecipeNameAlreadyExistsExcepti
 import edu.chnu.recman_backend.recipes.exceptions.RecipeNotFoundException;
 import edu.chnu.recman_backend.recipes.models.Recipe;
 import edu.chnu.recman_backend.recipes.repositories.RecipeRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class RecipeService {
     private final RecipeRepository repository;
     private final AuthService authService;
-
-    public RecipeService(RecipeRepository repository, AuthService authService) {
-        this.repository = repository;
-        this.authService = authService;
-    }
 
     public RecipeDetails create(RecipeCreateRequest request) {
         User user = authService.getCurrentUser();
