@@ -1,9 +1,7 @@
 package edu.chnu.recman_backend.auth.services;
 
 import edu.chnu.recman_backend.auth.dtos.LoginRequest;
-import edu.chnu.recman_backend.auth.dtos.LoginResponse;
 import edu.chnu.recman_backend.auth.dtos.RegisterRequest;
-import edu.chnu.recman_backend.auth.dtos.RegisterResponse;
 import edu.chnu.recman_backend.auth.exceptions.UsernameAlreadyExistsException;
 import edu.chnu.recman_backend.auth.models.Role;
 import edu.chnu.recman_backend.auth.models.User;
@@ -30,7 +28,7 @@ public class AuthService {
         this.encoder = encoder;
     }
 
-    public RegisterResponse register(RegisterRequest request) {
+    public void register(RegisterRequest request) {
         if (repository.existsByUsername(request.username())) {
             throw new UsernameAlreadyExistsException();
         }
@@ -38,14 +36,13 @@ public class AuthService {
         User user = new User(request.username(), encoder.encode(request.password()), Role.USER);
 
         repository.save(user);
-        return new RegisterResponse(user.getUsername());
     }
 
-    public LoginResponse login(LoginRequest request) {
+    public String login(LoginRequest request) {
         manager.authenticate(new UsernamePasswordAuthenticationToken(request.username(), request.password()));
 
         User user = repository.findByUsername(request.username()).orElseThrow();
-        return new LoginResponse(jwtService.generateToken(user));
+        return jwtService.generateToken(user);
     }
 
     public User getCurrentUser() {
