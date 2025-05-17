@@ -56,15 +56,13 @@ class AuthControllerIntegrationTest {
         mockMvc.perform(MockMvcRequestBuilders.post(REGISTER_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(REGISTER_REQUEST)))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.username").value(REGISTER_REQUEST.username()));
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
 
         mockMvc.perform(MockMvcRequestBuilders.post(LOGIN_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(LOGIN_REQUEST)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.token").exists())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.token", Matchers.containsString("ey")));
+                .andExpect(MockMvcResultMatchers.content().string(Matchers.containsString("ey")));
     }
 
     @Test
@@ -72,7 +70,7 @@ class AuthControllerIntegrationTest {
         mockMvc.perform(MockMvcRequestBuilders.post(REGISTER_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(REGISTER_REQUEST)))
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
 
         mockMvc.perform(MockMvcRequestBuilders.post(REGISTER_URL)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -87,7 +85,7 @@ class AuthControllerIntegrationTest {
         mockMvc.perform(MockMvcRequestBuilders.post(REGISTER_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(REGISTER_REQUEST)))
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
 
         mockMvc.perform(MockMvcRequestBuilders.post(LOGIN_URL)
                         .contentType(MediaType.APPLICATION_JSON)
