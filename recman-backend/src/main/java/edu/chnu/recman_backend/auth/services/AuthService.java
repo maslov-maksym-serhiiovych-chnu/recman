@@ -6,6 +6,7 @@ import edu.chnu.recman_backend.auth.exceptions.UsernameAlreadyExistsException;
 import edu.chnu.recman_backend.auth.models.Role;
 import edu.chnu.recman_backend.auth.models.User;
 import edu.chnu.recman_backend.auth.repositories.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,19 +15,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class AuthService {
     private final UserRepository repository;
     private final JwtService jwtService;
     private final AuthenticationManager manager;
     private final PasswordEncoder encoder;
-
-    public AuthService(UserRepository repository, JwtService jwtService, AuthenticationManager manager,
-                       PasswordEncoder encoder) {
-        this.repository = repository;
-        this.jwtService = jwtService;
-        this.manager = manager;
-        this.encoder = encoder;
-    }
 
     public void register(RegisterRequest request) {
         if (repository.existsByUsername(request.username())) {
