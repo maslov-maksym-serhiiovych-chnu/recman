@@ -28,17 +28,18 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 class AuthServiceTest {
-    private static final RegisterRequest REGISTER_REQUEST = new RegisterRequest("user", "password");
-    private static final LoginRequest LOGIN_REQUEST = new LoginRequest("user", "password");
-    private static final String ENCODED_PASSWORD = "encoded-password";
     private static final User USER = new User("user", "password", Role.USER);
-    private static final String TOKEN = "token";
+    private static final RegisterRequest REGISTER_REQUEST = new RegisterRequest(USER.getUsername(), USER.getPassword());
+    private static final LoginRequest LOGIN_REQUEST = new LoginRequest(USER.getUsername(), USER.getPassword());
 
     private static final BadCredentialsException BAD_CREDENTIALS_EXCEPTION =
             new BadCredentialsException("Bad credentials");
 
     private static final UsernameNotFoundException USERNAME_NOT_FOUND_EXCEPTION =
             new UsernameNotFoundException("Username not found");
+
+    private static final String TOKEN = "token";
+    private static final String ENCODED_PASSWORD = "encoded-password";
 
     @Mock
     private UserRepository repository;
@@ -121,9 +122,7 @@ class AuthServiceTest {
 
     @Test
     void getCurrentUser_shouldReturnUserFromSecurityContext() {
-        Mockito.when(authentication.getName()).thenReturn(USER.getUsername());
-        Mockito.when(context.getAuthentication()).thenReturn(authentication);
-        SecurityContextHolder.setContext(context);
+        mockSecurityContextWithUser(USER.getUsername());
 
         Mockito.when(repository.findByUsername(USER.getUsername())).thenReturn(Optional.of(USER));
 
@@ -136,9 +135,7 @@ class AuthServiceTest {
 
     @Test
     void getCurrentUser_shouldThrowIfUserNotFound() {
-        Mockito.when(authentication.getName()).thenReturn(USER.getUsername());
-        Mockito.when(context.getAuthentication()).thenReturn(authentication);
-        SecurityContextHolder.setContext(context);
+        mockSecurityContextWithUser(USER.getUsername());
 
         Mockito.when(repository.findByUsername(USER.getUsername())).thenReturn(Optional.empty());
 
@@ -146,5 +143,11 @@ class AuthServiceTest {
                 service.getCurrentUser());
 
         Assertions.assertEquals(USERNAME_NOT_FOUND_EXCEPTION.getMessage(), ex.getMessage());
+    }
+
+    private void mockSecurityContextWithUser(String username) {
+        Mockito.when(authentication.getName()).thenReturn(username);
+        Mockito.when(context.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(context);
     }
 }

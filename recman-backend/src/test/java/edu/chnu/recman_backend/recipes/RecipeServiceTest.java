@@ -25,24 +25,25 @@ import java.util.Optional;
 class RecipeServiceTest {
     private static final User USER = new User("user", "password", Role.USER);
 
-    private static final RecipeCreateRequest RECIPE_CREATE_REQUEST =
-            new RecipeCreateRequest("Borscht", "Soup");
-
-    private static final RecipeNameAlreadyExistsException RECIPE_NAME_ALREADY_EXISTS_EXCEPTION =
-            new RecipeNameAlreadyExistsException();
-
-    private static final Long RECIPE_ID = 1L;
-    private static final RecipeNotFoundException RECIPE_NOT_FOUND_EXCEPTION = new RecipeNotFoundException();
-    
-    private static final RecipeUpdateRequest RECIPE_UPDATE_REQUEST =
-            new RecipeUpdateRequest("New", "New");
-
     private static final List<Recipe> RECIPES = List.of(
             new Recipe("Borscht", "Soup", USER),
             new Recipe("Varenyky", "Cheese", USER)
     );
 
     private final Recipe RECIPE = new Recipe("Borscht", "Soup", USER);
+    
+    private static final RecipeCreateRequest RECIPE_CREATE_REQUEST =
+            new RecipeCreateRequest("Borscht", "Soup");
+
+    private static final RecipeUpdateRequest RECIPE_UPDATE_REQUEST =
+            new RecipeUpdateRequest("New", "New");
+    
+    private static final RecipeNameAlreadyExistsException RECIPE_NAME_ALREADY_EXISTS_EXCEPTION =
+            new RecipeNameAlreadyExistsException();
+
+    private static final RecipeNotFoundException RECIPE_NOT_FOUND_EXCEPTION = new RecipeNotFoundException();
+    
+    private static final Long RECIPE_ID = 1L;
 
     @Mock
     private RecipeRepository repository;
