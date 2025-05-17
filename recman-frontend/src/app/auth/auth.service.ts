@@ -7,17 +7,9 @@ export interface LoginRequest {
   password: string;
 }
 
-export interface LoginResponse {
-  token: string;
-}
-
 export interface RegisterRequest {
   username: string;
   password: string;
-}
-
-export interface RegisterResponse {
-  username: string;
 }
 
 @Injectable({
@@ -28,14 +20,14 @@ export class AuthService {
 
   constructor(private http: HttpClient) {}
 
-  login(req: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.API_URL}/login`, req).pipe(
-      tap((res) => localStorage.setItem('token', res.token))
+  login(req: LoginRequest): Observable<string> {
+    return this.http.post<string>(`${this.API_URL}/login`, req, {responseType: 'text' as 'json'}).pipe(
+      tap(res => localStorage.setItem('token', res))
     );
   }
 
-  register(req: RegisterRequest): Observable<RegisterResponse> {
-    return this.http.post<RegisterResponse>(`${this.API_URL}/register`, req);
+  register(req: RegisterRequest): Observable<void> {
+    return this.http.post<void>(`${this.API_URL}/register`, req);
   }
 
   logout(): void {
