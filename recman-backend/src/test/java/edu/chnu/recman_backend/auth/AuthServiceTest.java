@@ -1,9 +1,7 @@
 package edu.chnu.recman_backend.auth;
 
 import edu.chnu.recman_backend.auth.dtos.LoginRequest;
-import edu.chnu.recman_backend.auth.dtos.LoginResponse;
 import edu.chnu.recman_backend.auth.dtos.RegisterRequest;
-import edu.chnu.recman_backend.auth.dtos.RegisterResponse;
 import edu.chnu.recman_backend.auth.exceptions.UsernameAlreadyExistsException;
 import edu.chnu.recman_backend.auth.models.Role;
 import edu.chnu.recman_backend.auth.models.User;
@@ -72,14 +70,12 @@ class AuthServiceTest {
     void register_shouldCreateUserWithEncodedPasswordAndDefaultRole() {
         Mockito.when(encoder.encode(REGISTER_REQUEST.password())).thenReturn(ENCODED_PASSWORD);
 
-        RegisterResponse response = service.register(REGISTER_REQUEST);
+        service.register(REGISTER_REQUEST);
 
         Mockito.verify(repository).save(Mockito.argThat(user ->
                 user.getUsername().equals(REGISTER_REQUEST.username()) &&
                         user.getPassword().equals(ENCODED_PASSWORD) &&
                         user.getRole() == Role.USER));
-
-        Assertions.assertEquals(REGISTER_REQUEST.username(), response.username());
     }
 
     @Test
@@ -97,13 +93,13 @@ class AuthServiceTest {
         Mockito.when(repository.findByUsername(USER.getUsername())).thenReturn(Optional.of(USER));
         Mockito.when(jwtService.generateToken(USER)).thenReturn(TOKEN);
 
-        LoginResponse response = service.login(LOGIN_REQUEST);
+        String response = service.login(LOGIN_REQUEST);
 
         Mockito.verify(authenticationManager).authenticate(new UsernamePasswordAuthenticationToken(
                 LOGIN_REQUEST.username(),
                 LOGIN_REQUEST.password()));
 
-        Assertions.assertEquals(TOKEN, response.token());
+        Assertions.assertEquals(TOKEN, response);
     }
 
     @Test
