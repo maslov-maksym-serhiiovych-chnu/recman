@@ -76,6 +76,7 @@ class RecipeControllerIntegrationTest {
     void createRecipe_returnsCreatedRecipe() throws Exception {
         mockMvc.perform(authorized(json(MockMvcRequestBuilders.post(RECIPES_URL), RECIPE_CREATE_REQUEST)))
                 .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(RECIPE_ID))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").value(RECIPE_CREATE_REQUEST.name()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.description")
                         .value(RECIPE_CREATE_REQUEST.description()));
@@ -92,7 +93,7 @@ class RecipeControllerIntegrationTest {
     void readRecipeById_returnsCorrectRecipe() throws Exception {
         createRecipe(RECIPE_CREATE_REQUEST);
 
-        assertRecipeById(RECIPE_CREATE_REQUEST.name(), RECIPE_CREATE_REQUEST.description());
+        assertRecipe(RECIPE_CREATE_REQUEST.name(), RECIPE_CREATE_REQUEST.description());
     }
 
     @Test
@@ -102,7 +103,7 @@ class RecipeControllerIntegrationTest {
         mockMvc.perform(authorized(json(MockMvcRequestBuilders.put(RECIPES_URL + "/" + RECIPE_ID),
                 RECIPE_UPDATE_REQUEST))).andExpect(MockMvcResultMatchers.status().isNoContent());
 
-        assertRecipeById(RECIPE_UPDATE_REQUEST.name(), RECIPE_UPDATE_REQUEST.description());
+        assertRecipe(RECIPE_UPDATE_REQUEST.name(), RECIPE_UPDATE_REQUEST.description());
     }
 
     @Test
@@ -141,9 +142,10 @@ class RecipeControllerIntegrationTest {
                 .andExpect(MockMvcResultMatchers.status().isCreated());
     }
 
-    private void assertRecipeById(String expectedName, String expectedDescription) throws Exception {
+    private void assertRecipe(String expectedName, String expectedDescription) throws Exception {
         mockMvc.perform(authorized(MockMvcRequestBuilders.get(RECIPES_URL + "/" + RECIPE_ID)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(RECIPE_ID))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").value(expectedName))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.description").value(expectedDescription));
     }

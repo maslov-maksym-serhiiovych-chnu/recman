@@ -4,7 +4,7 @@ import edu.chnu.recman_backend.auth.models.Role;
 import edu.chnu.recman_backend.auth.models.User;
 import edu.chnu.recman_backend.auth.services.AuthService;
 import edu.chnu.recman_backend.recipes.dtos.RecipeCreateRequest;
-import edu.chnu.recman_backend.recipes.dtos.RecipeDetails;
+import edu.chnu.recman_backend.recipes.dtos.RecipeResponse;
 import edu.chnu.recman_backend.recipes.dtos.RecipeUpdateRequest;
 import edu.chnu.recman_backend.recipes.exceptions.RecipeNameAlreadyExistsException;
 import edu.chnu.recman_backend.recipes.exceptions.RecipeNotFoundException;
@@ -67,7 +67,7 @@ class RecipeServiceTest {
         Mockito.when(repository.save(Mockito.any(Recipe.class))).thenAnswer(inv ->
                 inv.getArgument(0));
 
-        RecipeDetails result = service.create(RECIPE_CREATE_REQUEST);
+        RecipeResponse result = service.create(RECIPE_CREATE_REQUEST);
 
         Assertions.assertEquals(RECIPE_CREATE_REQUEST.name(), result.name());
         Assertions.assertEquals(RECIPE_CREATE_REQUEST.description(), result.description());
@@ -88,7 +88,7 @@ class RecipeServiceTest {
     void read_ShouldReturnRecipeDetails_WhenFound() {
         Mockito.when(repository.findByIdAndUser(RECIPE_ID, USER)).thenReturn(Optional.of(RECIPE));
 
-        RecipeDetails result = service.read(RECIPE_ID);
+        RecipeResponse result = service.read(RECIPE_ID);
 
         Assertions.assertEquals(RECIPE.getName(), result.name());
         Assertions.assertEquals(RECIPE.getDescription(), result.description());
