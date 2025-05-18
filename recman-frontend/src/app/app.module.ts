@@ -8,10 +8,11 @@ import {NgOptimizedImage} from "@angular/common";
 import {RecipesComponent} from './recipes/recipes.component';
 import {ReactiveFormsModule} from '@angular/forms';
 import {LayoutComponent} from './layout/layout.component';
-import {provideHttpClient} from '@angular/common/http';
+import {provideHttpClient, withInterceptors} from '@angular/common/http';
 import {LoginComponent} from './auth/login/login.component';
 import {RegisterComponent} from './auth/register/register.component';
 import {LandingComponent} from './landing/landing.component';
+import {authInterceptor} from './auth/auth.interceptor';
 
 @NgModule({
   declarations: [
@@ -29,7 +30,7 @@ import {LandingComponent} from './landing/landing.component';
     NgOptimizedImage,
     ReactiveFormsModule
   ],
-  providers: [provideHttpClient()],
+  providers: [provideHttpClient(withInterceptors([authInterceptor]))],
   bootstrap: [AppComponent]
 })
 export class AppModule {

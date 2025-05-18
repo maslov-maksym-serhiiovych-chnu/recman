@@ -1,15 +1,6 @@
 import {Component} from '@angular/core';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
-import {HttpClient} from '@angular/common/http';
-
-interface RecipeListItem {
-  name: string;
-}
-
-interface RecipeDetails {
-  name: string;
-  description: string;
-}
+import {RecipeResponse, RecipesService} from './recipes.service';
 
 @Component({
   selector: 'app-recipes',
@@ -18,13 +9,13 @@ interface RecipeDetails {
   styleUrl: './recipes.component.css'
 })
 export class RecipesComponent {
-  recipes: RecipeListItem[] = [];
-  selectedRecipe: RecipeDetails | null = null;
+  recipes: RecipeResponse[] = [];
+  selectedRecipe: RecipeResponse | null = null;
   recipeForm: FormGroup;
   showForm = false;
   editingId: number | null = null;
 
-  constructor(private http: HttpClient, private fb: FormBuilder) {
+  constructor(private recipesService: RecipesService, private fb: FormBuilder) {
     this.recipeForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
       description: ['', Validators.required],
@@ -36,13 +27,13 @@ export class RecipesComponent {
   }
 
   fetchRecipes() {
-    this.http.get<RecipeListItem[]>('/api/recman/recipes').subscribe((data) => {
+    this.recipesService.readAll().subscribe((data) => {
       this.recipes = data;
     });
   }
 
-  selectRecipe(recipe: RecipeListItem) {
-    this.http.get<RecipeDetails>(`/api/recman/recipes/${recipe.name}`).subscribe((data) => {
+  selectRecipe(recipe: RecipeResponse) {
+    this.recipesService.read(recipe.id).subscribe((data) => {
       this.selectedRecipe = data;
     });
   }
@@ -52,32 +43,34 @@ export class RecipesComponent {
 
     const value = this.recipeForm.value;
 
-    if (this.editingId) {
-      this.http.put(`/api/recman/recipes/${this.editingId}`, value).subscribe(() => {
+    if (this.editingId !== null) {
+      this.recipesService.update(this.editingId, value).subscribe(() => {
         this.fetchRecipes();
         this.cancel();
       });
     } else {
-      this.http.post<RecipeDetails>('/api/recman/recipes', value).subscribe(() => {
+      this.recipesService.create(value).subscribe(() => {
         this.fetchRecipes();
         this.cancel();
       });
     }
   }
 
-  editRecipe(recipe: RecipeListItem) {
-    this.http.get<RecipeDetails>(`/api/recman/recipes/${recipe.name}`).subscribe((data) => {
-      this.recipeForm.setValue({name: data.name, description: data.description});
-      this.editingId = (recipe as any).id || null;
+  editRecipe(recipe: RecipeResponse) {
+    this.recipesService.read(recipe.id).subscribe((data) => {
+      this.recipeForm.setValue({
+        name: data.name,
+        description: data.description
+      });
+      this.editingId = data.id;
       this.showForm = true;
     });
   }
 
-  deleteRecipe(recipe: RecipeListItem) {
-    const id = (recipe as any).id;
-    this.http.delete(`/api/recman/recipes/${id}`).subscribe(() => {
+  deleteRecipe(recipe: RecipeResponse) {
+    this.recipesService.delete(recipe.id).subscribe(() => {
       this.fetchRecipes();
-      if (this.selectedRecipe?.name === recipe.name) {
+      if (this.selectedRecipe?.id === recipe.id) {
         this.selectedRecipe = null;
       }
     });
