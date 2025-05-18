@@ -6,7 +6,7 @@
 
   <ul class="space-y-2 mb-6">
     <li *ngFor="let recipe of recipes" class="p-4 bg-gray-800 rounded flex justify-between items-center">
-      <span (click)="selectRecipe(recipe)" class="cursor-pointer hover:underline">{{ recipe.name }}</span>
+      <span (click)="selectRecipe(recipe)" class="cursor-pointer hover:underline">{{ recipe.id }}</span>
       <div class="space-x-2">
         <button (click)="editRecipe(recipe)" class="text-yellow-400 hover:underline">Edit</button>
         <button (click)="deleteRecipe(recipe)" class="text-red-400 hover:underline">Delete</button>

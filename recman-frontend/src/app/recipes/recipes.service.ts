@@ -2,13 +2,18 @@ import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 
-export interface RecipeListItem {
-  id: number;
+export interface RecipeCreateRequest {
   name: string;
+  description: string;
 }
 
-export interface RecipeDetails {
-  id?: number;
+export interface RecipeUpdateRequest {
+  name?: string;
+  description?: string;
+}
+
+export interface RecipeResponse {
+  id: number;
   name: string;
   description: string;
 }
@@ -22,23 +27,23 @@ export class RecipesService {
   constructor(private http: HttpClient) {
   }
 
-  readAll(): Observable<RecipeListItem[]> {
-    return this.http.get<RecipeListItem[]>(this.API_URL);
+  readAll(): Observable<RecipeResponse[]> {
+    return this.http.get<RecipeResponse[]>(this.API_URL, {withCredentials: true});
   }
 
-  readByName(name: string): Observable<RecipeDetails> {
-    return this.http.get<RecipeDetails>(`${this.API_URL}/${name}`);
+  read(id: number): Observable<RecipeResponse> {
+    return this.http.get<RecipeResponse>(`${this.API_URL}/${id}`, {withCredentials: true});
   }
 
-  create(recipe: RecipeDetails): Observable<RecipeDetails> {
-    return this.http.post<RecipeDetails>(this.API_URL, recipe);
+  create(recipe: RecipeCreateRequest): Observable<RecipeResponse> {
+    return this.http.post<RecipeResponse>(this.API_URL, recipe, {withCredentials: true});
   }
 
-  update(id: number, recipe: RecipeDetails): Observable<void> {
-    return this.http.put<void>(`${this.API_URL}/${id}`, recipe);
+  update(id: number, recipe: RecipeUpdateRequest): Observable<void> {
+    return this.http.put<void>(`${this.API_URL}/${id}`, recipe, {withCredentials: true});
   }
 
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.API_URL}/${id}`);
+    return this.http.delete<void>(`${this.API_URL}/${id}`, {withCredentials: true});
   }
 }
