@@ -21,7 +21,7 @@ public class Recipe {
     @Column(length = 50, nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String description;
 
     @ManyToOne
