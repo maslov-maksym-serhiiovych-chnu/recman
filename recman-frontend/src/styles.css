@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
 .dark-dialog .mdc-dialog__surface {
+  padding: 1.5rem;
   background-color: #1f2937;
   border-radius: 0.5rem;
-  padding: 1.5rem;
 }
 
 .dark-dialog .mdc-dialog__surface .mat-mdc-dialog-title {

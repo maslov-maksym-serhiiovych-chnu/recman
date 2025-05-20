@@ -1,4 +1,11 @@
-<h2 mat-dialog-title class="text-white text-xl font-semibold">{{ data.recipe ? 'Edit' : 'Add' }} Recipe</h2>
+<h2 mat-dialog-title class="text-white text-xl font-semibold text-center">
+  {{ data.id != null ? 'Edit' : 'Add' }} Recipe
+</h2>
+
+<div *ngIf="errorMessage" class="text-red-400 text-sm text-center">
+  {{ errorMessage }}
+</div>
+
 <form [formGroup]="recipeForm" (ngSubmit)="onSubmit()" mat-dialog-content class="space-y-4">
   <div>
     <label class="block mb-1 font-medium text-white">Name</label>
@@ -29,7 +36,7 @@
     <button type="submit"
             class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-white font-semibold shadow"
             [disabled]="recipeForm.invalid">
-      {{ data.recipe ? 'Update' : 'Create' }}
+      {{ data.id != null ? 'Update' : 'Create' }}
     </button>
   </div>
 </form>
