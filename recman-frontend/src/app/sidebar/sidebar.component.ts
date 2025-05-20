@@ -1,4 +1,5 @@
 import {Component} from '@angular/core';
+import {AuthService} from '../auth/auth.service';
 import {Router} from '@angular/router';
 
 @Component({
@@ -8,15 +9,11 @@ import {Router} from '@angular/router';
   styleUrl: './sidebar.component.css'
 })
 export class SidebarComponent {
-  constructor(private router: Router) {
-  }
-
-  navigateToRecipes() {
-    this.router.navigate(['/recipes']);
+  constructor(private authService: AuthService, private router: Router) {
   }
 
   logout() {
-    localStorage.removeItem('token');
-    this.router.navigate(['/login']);
+    this.authService.removeToken();
+    this.router.navigate(['/auth/login']).then();
   }
 }

@@ -1,23 +1,16 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {Observable, tap} from 'rxjs';
+import {catchError, map, Observable, of, tap} from 'rxjs';
+import {TokenService} from './token.service';
 
 export interface LoginRequest {
   username: string;
   password: string;
 }
 
-export interface LoginResponse {
-  token: string;
-}
-
 export interface RegisterRequest {
   username: string;
   password: string;
-}
-
-export interface RegisterResponse {
-  username: string;
 }
 
 @Injectable({
@@ -26,23 +19,27 @@ export interface RegisterResponse {
 export class AuthService {
   private readonly API_URL = 'http://localhost:8080/api/recman/auth';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private tokenService: TokenService) {
+  }
 
-  login(req: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.API_URL}/login`, req).pipe(
-      tap((res) => localStorage.setItem('token', res.token))
+  login(req: LoginRequest): Observable<string> {
+    return this.http.post<string>(`${this.API_URL}/login`, req, {responseType: 'text' as 'json'}).pipe(
+      tap(res => this.tokenService.set(res))
     );
   }
 
-  register(req: RegisterRequest): Observable<RegisterResponse> {
-    return this.http.post<RegisterResponse>(`${this.API_URL}/register`, req);
+  register(req: RegisterRequest): Observable<void> {
+    return this.http.post<void>(`${this.API_URL}/register`, req);
   }
 
-  logout(): void {
-    localStorage.removeItem('token');
+  validateToken(): Observable<boolean> {
+    return this.http.get<void>(`${this.API_URL}/validate`).pipe(
+      map(() => true),
+      catchError(() => of(false))
+    );
   }
 
-  isAuthenticated(): boolean {
-    return !!localStorage.getItem('token');
+  removeToken(): void {
+    this.tokenService.remove();
   }
 }

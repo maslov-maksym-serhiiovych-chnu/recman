@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {Router} from '@angular/router';
 import {AuthService, RegisterRequest} from '../auth.service';
@@ -9,7 +9,7 @@ import {AuthService, RegisterRequest} from '../auth.service';
   templateUrl: './register.component.html',
   styleUrl: './register.component.css'
 })
-export class RegisterComponent {
+export class RegisterComponent implements OnInit {
   authForm!: FormGroup;
 
   constructor(
@@ -21,8 +21,8 @@ export class RegisterComponent {
 
   ngOnInit(): void {
     this.authForm = this.fb.group({
-      username: ['', [Validators.required]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+      username: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
+      password: ['', [Validators.required, Validators.minLength(8)]]
     });
   }
 
@@ -37,10 +37,12 @@ export class RegisterComponent {
 
     this.authService.register(req).subscribe({
       next: () => {
-        this.router.navigate(['/auth/login']);
+        this.router.navigate(['/auth/login']).then();
       },
       error: (err) => {
-        console.error('Registration failed', err);
+        if (err.status === 409) {
+          this.authForm.get('username')?.setErrors({usernameExists: true});
+        }
       }
     });
   }

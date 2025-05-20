@@ -1,41 +1,37 @@
-<div class="p-6 text-white">
-  <div class="flex justify-between items-center mb-6">
-    <h2 class="text-2xl font-bold">Recipes</h2>
-    <button (click)="showForm = true" class="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700">+ Add Recipe</button>
+<div class="text-white">
+  <div class="mb-6 flex justify-between items-center">
+    <h2 class="text-3xl font-bold">Recipes</h2>
+
+    <button (click)="openDialog()" class="px-4 py-2 inline-flex items-center rounded shadow bg-blue-600
+    hover:bg-blue-700 text-sm font-medium text-white">
+      + Add Recipe
+    </button>
   </div>
 
-  <ul class="space-y-2 mb-6">
-    <li *ngFor="let recipe of recipes" class="p-4 bg-gray-800 rounded flex justify-between items-center">
-      <span (click)="selectRecipe(recipe)" class="cursor-pointer hover:underline">{{ recipe.name }}</span>
-      <div class="space-x-2">
-        <button (click)="editRecipe(recipe)" class="text-yellow-400 hover:underline">Edit</button>
-        <button (click)="deleteRecipe(recipe)" class="text-red-400 hover:underline">Delete</button>
-      </div>
-    </li>
-  </ul>
+  <div class="mb-6 overflow-hidden shadow ring-1 ring-white/10 sm:rounded-lg">
+    <table class="min-w-full divide-y divide-gray-700 bg-gray-800 table-auto">
+      <thead class="bg-gray-700">
+      <tr>
+        <th scope="col" class="px-6 py-3 text-left text-sm font-semibold text-white w-1/4">Name</th>
+        <th scope="col" class="px-6 py-3 text-left text-sm font-semibold text-white w-1/2">Description</th>
+        <th scope="col" class="px-6 py-3 text-left text-sm font-semibold text-white w-1/4">Actions</th>
+      </tr>
+      </thead>
 
-  <div *ngIf="showForm" class="p-4 bg-gray-900 rounded">
-    <form [formGroup]="recipeForm" (ngSubmit)="onSubmit()">
-      <div class="mb-4">
-        <label class="block mb-1">Name</label>
-        <input type="text" formControlName="name" class="w-full p-2 rounded bg-gray-700 text-white"/>
-      </div>
-      <div class="mb-4">
-        <label class="block mb-1">Description</label>
-        <textarea formControlName="description" class="w-full p-2 rounded bg-gray-700 text-white"></textarea>
-      </div>
-      <div class="flex space-x-4">
-        <button type="submit" class="bg-green-600 px-4 py-2 rounded hover:bg-green-700">
-          {{ editingId ? 'Update' : 'Create' }}
-        </button>
-        <button type="button" (click)="cancel()" class="bg-gray-600 px-4 py-2 rounded hover:bg-gray-700">Cancel</button>
-      </div>
-    </form>
-  </div>
-
-  <div *ngIf="selectedRecipe" class="mt-6 p-4 bg-gray-800 rounded">
-    <h3 class="text-xl font-semibold mb-2">Details</h3>
-    <p><strong>Name:</strong> {{ selectedRecipe.name }}</p>
-    <p><strong>Description:</strong> {{ selectedRecipe.description }}</p>
+      <tbody class="divide-y divide-gray-700">
+      <tr *ngFor="let recipe of recipes" class="hover:bg-gray-900 transition align-top">
+        <td class="px-6 py-4 text-sm break-words text-white">{{ recipe.name }}</td>
+        <td
+          class="px-6 py-4 text-sm text-gray-300 break-words whitespace-pre-line">{{ recipe.description |
+          slice:0:100 }}{{ recipe.description.length > 100 ? '...' : '' }}
+        </td>
+        <td class="px-6 py-4 text-sm space-x-4">
+          <button (click)="openDialog(recipe)" class="text-yellow-400 hover:underline">Edit</button>
+          <button (click)="deleteRecipe(recipe)" class="text-red-400 hover:underline">Delete</button>
+          <button (click)="openViewDialog(recipe)" class="text-blue-400 hover:underline">Details</button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
   </div>
 </div>

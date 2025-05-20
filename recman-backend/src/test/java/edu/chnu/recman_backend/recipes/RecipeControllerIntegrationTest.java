@@ -1,6 +1,5 @@
 package edu.chnu.recman_backend.recipes;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.chnu.recman_backend.TestcontainersConfiguration;
 import edu.chnu.recman_backend.auth.dtos.LoginRequest;
@@ -29,22 +28,23 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 @AutoConfigureMockMvc
 class RecipeControllerIntegrationTest {
     private static final User USER = new User("user", "password", Role.USER);
-    private static final String REGISTER_URL = "/api/recman/auth/register";
+
+    private final Recipe FIRST_RECIPE = new Recipe("Borscht", "Soup", USER),
+            SECOND_RECIPE = new Recipe("Varenyky", "Cheese", USER);
+
     private static final RegisterRequest REGISTER_REQUEST = new RegisterRequest("user", "password");
-    private static final String LOGIN_URL = "/api/recman/auth/login";
     private static final LoginRequest LOGIN_REQUEST = new LoginRequest("user", "password");
-    private static final String RECIPES_URL = "/api/recman/recipes";
 
     private static final RecipeCreateRequest RECIPE_CREATE_REQUEST =
             new RecipeCreateRequest("Borscht", "Soup");
 
-    private static final Long RECIPE_ID = 1L, SECOND_RECIPE_ID = 2L;
-
     private static final RecipeUpdateRequest RECIPE_UPDATE_REQUEST =
             new RecipeUpdateRequest("Borscht", "New");
 
-    private final Recipe FIRST_RECIPE = new Recipe("Borscht", "Soup", USER),
-            SECOND_RECIPE = new Recipe("Varenyky", "Cheese", USER);
+    private static final String REGISTER_URL = "/api/recman/auth/register";
+    private static final String LOGIN_URL = "/api/recman/auth/login";
+    private static final String RECIPES_URL = "/api/recman/recipes";
+    private static final Long RECIPE_ID = 1L, SECOND_RECIPE_ID = 2L;
 
     @Autowired
     private MockMvc mockMvc;
@@ -62,28 +62,21 @@ class RecipeControllerIntegrationTest {
         template.execute("TRUNCATE TABLE recipes RESTART IDENTITY CASCADE");
         template.execute("TRUNCATE TABLE users RESTART IDENTITY CASCADE");
 
-        mockMvc.perform(MockMvcRequestBuilders.post(REGISTER_URL)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(REGISTER_REQUEST)))
-                .andExpect(MockMvcResultMatchers.status().isOk());
+        mockMvc.perform(json(MockMvcRequestBuilders.post(REGISTER_URL), REGISTER_REQUEST))
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
 
-        MvcResult loginResult = mockMvc.perform(MockMvcRequestBuilders.post(LOGIN_URL)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(LOGIN_REQUEST)))
+        MvcResult loginResult = mockMvc.perform(json(MockMvcRequestBuilders.post(LOGIN_URL), LOGIN_REQUEST))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn();
 
-        String responseBody = loginResult.getResponse().getContentAsString();
-        JsonNode json = mapper.readTree(responseBody);
-        accessToken = json.get("token").asText();
+        accessToken = loginResult.getResponse().getContentAsString();
     }
 
     @Test
     void createRecipe_returnsCreatedRecipe() throws Exception {
-        mockMvc.perform(authorized(MockMvcRequestBuilders.post(RECIPES_URL))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(RECIPE_CREATE_REQUEST)))
+        mockMvc.perform(authorized(json(MockMvcRequestBuilders.post(RECIPES_URL), RECIPE_CREATE_REQUEST)))
                 .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(RECIPE_ID))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").value(RECIPE_CREATE_REQUEST.name()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.description")
                         .value(RECIPE_CREATE_REQUEST.description()));
@@ -98,44 +91,24 @@ class RecipeControllerIntegrationTest {
 
     @Test
     void readRecipeById_returnsCorrectRecipe() throws Exception {
-        mockMvc.perform(authorized(MockMvcRequestBuilders.post(RECIPES_URL))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(RECIPE_CREATE_REQUEST)))
-                .andExpect(MockMvcResultMatchers.status().isCreated());
+        createRecipe(RECIPE_CREATE_REQUEST);
 
-        mockMvc.perform(authorized(MockMvcRequestBuilders.get(RECIPES_URL + "/" + RECIPE_ID)))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value(RECIPE_CREATE_REQUEST.name()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.description")
-                        .value(RECIPE_CREATE_REQUEST.description()));
+        assertRecipe(RECIPE_CREATE_REQUEST.name(), RECIPE_CREATE_REQUEST.description());
     }
 
     @Test
     void updateRecipe_updatesFields() throws Exception {
-        mockMvc.perform(authorized(MockMvcRequestBuilders.post(RECIPES_URL))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(RECIPE_CREATE_REQUEST)))
-                .andExpect(MockMvcResultMatchers.status().isCreated());
+        createRecipe(RECIPE_CREATE_REQUEST);
 
+        mockMvc.perform(authorized(json(MockMvcRequestBuilders.put(RECIPES_URL + "/" + RECIPE_ID),
+                RECIPE_UPDATE_REQUEST))).andExpect(MockMvcResultMatchers.status().isNoContent());
 
-        mockMvc.perform(authorized(MockMvcRequestBuilders.put(RECIPES_URL + "/" + RECIPE_ID))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(RECIPE_UPDATE_REQUEST)))
-                .andExpect(MockMvcResultMatchers.status().isNoContent());
-
-        mockMvc.perform(authorized(MockMvcRequestBuilders.get(RECIPES_URL + "/" + RECIPE_ID)))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value(RECIPE_UPDATE_REQUEST.name()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.description")
-                        .value(RECIPE_UPDATE_REQUEST.description()));
+        assertRecipe(RECIPE_UPDATE_REQUEST.name(), RECIPE_UPDATE_REQUEST.description());
     }
 
     @Test
     void deleteRecipe_removesIt() throws Exception {
-        mockMvc.perform(authorized(MockMvcRequestBuilders.post(RECIPES_URL)
-                ).contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(RECIPE_CREATE_REQUEST)))
-                .andExpect(MockMvcResultMatchers.status().isCreated());
+        createRecipe(RECIPE_CREATE_REQUEST);
 
         mockMvc.perform(authorized(MockMvcRequestBuilders.delete(RECIPES_URL + "/" + RECIPE_ID)))
                 .andExpect(MockMvcResultMatchers.status().isNoContent());
@@ -146,39 +119,44 @@ class RecipeControllerIntegrationTest {
 
     @Test
     void creatingDuplicateName_returnsConflict() throws Exception {
+        createRecipe(RECIPE_CREATE_REQUEST);
 
-        mockMvc.perform(authorized(MockMvcRequestBuilders.post(RECIPES_URL))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(RECIPE_CREATE_REQUEST)))
-                .andExpect(MockMvcResultMatchers.status().isCreated());
-
-        mockMvc.perform(authorized(MockMvcRequestBuilders.post(RECIPES_URL))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(RECIPE_CREATE_REQUEST)))
-                .andExpect(MockMvcResultMatchers.status().isConflict())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.error").exists());
+        assertConflict(json(MockMvcRequestBuilders.post(RECIPES_URL), RECIPE_CREATE_REQUEST));
     }
 
     @Test
     void updateRecipe_withDuplicateName_returnsConflict() throws Exception {
-        mockMvc.perform(authorized(MockMvcRequestBuilders.post(RECIPES_URL))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(FIRST_RECIPE)))
-                .andExpect(MockMvcResultMatchers.status().isCreated());
+        createRecipe(FIRST_RECIPE);
+        createRecipe(SECOND_RECIPE);
 
-        mockMvc.perform(authorized(MockMvcRequestBuilders.post(RECIPES_URL))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(SECOND_RECIPE)))
-                .andExpect(MockMvcResultMatchers.status().isCreated());
-
-        mockMvc.perform(authorized(MockMvcRequestBuilders.put(RECIPES_URL + "/" + SECOND_RECIPE_ID))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(RECIPE_UPDATE_REQUEST)))
-                .andExpect(MockMvcResultMatchers.status().isConflict())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.error").exists());
+        assertConflict(json(MockMvcRequestBuilders.put(RECIPES_URL + "/" + SECOND_RECIPE_ID),
+                RECIPE_UPDATE_REQUEST));
     }
 
     private MockHttpServletRequestBuilder authorized(MockHttpServletRequestBuilder builder) {
         return builder.header("Authorization", "Bearer " + accessToken);
+    }
+
+    private void createRecipe(Object request) throws Exception {
+        mockMvc.perform(authorized(json(MockMvcRequestBuilders.post(RECIPES_URL), request)))
+                .andExpect(MockMvcResultMatchers.status().isCreated());
+    }
+
+    private void assertRecipe(String expectedName, String expectedDescription) throws Exception {
+        mockMvc.perform(authorized(MockMvcRequestBuilders.get(RECIPES_URL + "/" + RECIPE_ID)))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(RECIPE_ID))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value(expectedName))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.description").value(expectedDescription));
+    }
+
+    private MockHttpServletRequestBuilder json(MockHttpServletRequestBuilder builder, Object body) throws Exception {
+        return builder.contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(body));
+    }
+
+    private void assertConflict(MockHttpServletRequestBuilder request) throws Exception {
+        mockMvc.perform(authorized(request))
+                .andExpect(MockMvcResultMatchers.status().isConflict())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error").exists());
     }
 }

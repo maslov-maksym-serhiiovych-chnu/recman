@@ -11,7 +11,7 @@ import {AuthService} from '../auth.service';
 })
 export class LoginComponent implements OnInit {
   authForm!: FormGroup;
-  errorMessage: string = '';
+  authError: string | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -23,7 +23,7 @@ export class LoginComponent implements OnInit {
   ngOnInit(): void {
     this.authForm = this.fb.group({
       username: ['', [Validators.required]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+      password: ['', [Validators.required]]
     });
   }
 
@@ -33,10 +33,16 @@ export class LoginComponent implements OnInit {
     }
 
     this.authService.login(this.authForm.value).subscribe({
-      next: () => this.router.navigate(['']),
+      next: () => {
+        this.authError = null;
+        this.router.navigate(['']).then();
+      },
       error: (err) => {
-        console.error(err);
-        this.errorMessage = 'Invalid credentials';
+        if (err.status === 401) {
+          this.authError = 'Invalid username or password';
+        } else {
+          this.authError = 'Something went wrong';
+        }
       }
     });
   }

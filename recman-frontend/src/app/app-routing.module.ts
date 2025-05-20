@@ -1,24 +1,27 @@
-import {NgModule} from '@angular/core';
-import {RouterModule, Routes} from '@angular/router';
-import {RecipesComponent} from './recipes/recipes.component';
-import {authGuard} from './auth/auth.guard';
-import {LayoutComponent} from './layout/layout.component';
 import {LandingComponent} from './landing/landing.component';
-import {LoginComponent} from './auth/login/login.component';
-import {RegisterComponent} from './auth/register/register.component';
+import {LayoutComponent} from './layout/layout.component';
+import {RouterModule, Routes} from '@angular/router';
+import {authGuard} from './auth/auth.guard';
+import {NgModule} from '@angular/core';
 
 const routes: Routes = [
   {
+    path: 'auth',
+    loadChildren: () => import('./auth/auth.module').then(m => m.AuthModule),
+  },
+  {
     path: '',
-    canActivate: [authGuard],
+    canActivateChild: [authGuard],
     component: LayoutComponent,
     children: [
       {path: '', redirectTo: 'recipes', pathMatch: 'full'},
-      {path: 'recipes', component: RecipesComponent},
+      {
+        path: 'recipes',
+        loadChildren: () => import('./recipes/recipes.module')
+          .then(m => m.RecipesModule)
+      },
     ]
   },
-  {path: 'auth/login', component: LoginComponent},
-  {path: 'auth/register', component: RegisterComponent},
   {path: 'landing', component: LandingComponent},
 ];
 

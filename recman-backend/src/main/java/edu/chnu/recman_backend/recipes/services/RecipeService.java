@@ -3,53 +3,49 @@ package edu.chnu.recman_backend.recipes.services;
 import edu.chnu.recman_backend.auth.models.User;
 import edu.chnu.recman_backend.auth.services.AuthService;
 import edu.chnu.recman_backend.recipes.dtos.RecipeCreateRequest;
-import edu.chnu.recman_backend.recipes.dtos.RecipeDetails;
-import edu.chnu.recman_backend.recipes.dtos.RecipeListItem;
+import edu.chnu.recman_backend.recipes.dtos.RecipeResponse;
 import edu.chnu.recman_backend.recipes.dtos.RecipeUpdateRequest;
 import edu.chnu.recman_backend.recipes.exceptions.RecipeNameAlreadyExistsException;
 import edu.chnu.recman_backend.recipes.exceptions.RecipeNotFoundException;
 import edu.chnu.recman_backend.recipes.models.Recipe;
 import edu.chnu.recman_backend.recipes.repositories.RecipeRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class RecipeService {
     private final RecipeRepository repository;
     private final AuthService authService;
 
-    public RecipeService(RecipeRepository repository, AuthService authService) {
-        this.repository = repository;
-        this.authService = authService;
-    }
-
-    public RecipeDetails create(RecipeCreateRequest request) {
+    public RecipeResponse create(RecipeCreateRequest request) {
         User user = authService.getCurrentUser();
 
         validateName(request.name(), user);
 
         Recipe recipe = new Recipe(request.name(), request.description(), user);
-
         repository.save(recipe);
-        return new RecipeDetails(recipe.getName(), recipe.getDescription());
+
+        return toResponse(recipe);
     }
 
-    public List<RecipeListItem> readAll() {
+    public List<RecipeResponse> readAll() {
         User user = authService.getCurrentUser();
 
         return repository.findAllByUser(user)
                 .stream()
-                .map(r -> new RecipeListItem(r.getName()))
+                .map(this::toResponse)
                 .toList();
     }
 
-    public RecipeDetails read(Long id) {
+    public RecipeResponse read(Long id) {
         User user = authService.getCurrentUser();
 
         return repository.findByIdAndUser(id, user)
-                .map(r -> new RecipeDetails(r.getName(), r.getDescription()))
+                .map(this::toResponse)
                 .orElseThrow(RecipeNotFoundException::new);
     }
 
@@ -73,7 +69,6 @@ public class RecipeService {
         User user = authService.getCurrentUser();
 
         Recipe recipe = repository.findByIdAndUser(id, user).orElseThrow(RecipeNotFoundException::new);
-
         repository.delete(recipe);
     }
 
@@ -81,5 +76,9 @@ public class RecipeService {
         if (repository.existsByNameAndUser(name, user)) {
             throw new RecipeNameAlreadyExistsException();
         }
+    }
+
+    private RecipeResponse toResponse(Recipe recipe) {
+        return new RecipeResponse(recipe.getId(), recipe.getName(), recipe.getDescription());
     }
 }

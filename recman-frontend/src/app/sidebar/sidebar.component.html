@@ -1,21 +1,24 @@
-<aside class="w-64 h-full p-4 flex flex-col bg-black text-white">
-  <div class="mb-10" (click)="navigateToRecipes()">
+<aside class="w-64 h-full flex flex-col flex-shrink-0 bg-black border-r border-white/10 text-white">
+  <div class="h-16 flex items-center justify-center border-b border-white/10">
     <img ngSrc="logo.svg" alt="Logo" width="64" height="64"/>
   </div>
 
-  <nav>
-    <ul class="space-y-2">
+  <nav class="flex-1 px-4 py-6 overflow-y-auto">
+    <ul class="space-y-1">
       <li>
-        <a [routerLink]="['/recipes']"
-           class="px-2 py-2 flex items-center hover:bg-gray-900 rounded-md text-base font-medium text-blue-300 hover:text-blue-400">
-          <img ngSrc="recipes.svg" alt="Recipes" width="28" height="28" class="mr-4"/>
+        <a [routerLink]="['/recipes']" routerLinkActive="bg-gray-800 border-l-4 border-blue-500 text-white"
+           [routerLinkActiveOptions]="{ exact: true }"
+           class="px-3 py-2 group flex items-center rounded-md hover:bg-gray-900 text-sm font-medium text-blue-300
+           hover:text-white transition">
+          <img ngSrc="recipes.svg" alt="Recipes" width="20" height="20" class="mr-3"/>
           Recipes
         </a>
       </li>
+
       <li>
-        <a (click)="logout()"
-           class="px-2 py-2 flex items-center hover:bg-gray-900 rounded-md text-base font-medium text-blue-300 hover:text-blue-400">
-          <img ngSrc="log-out.svg" alt="Log out" width="28" height="28" class="mr-4"/>
+        <a (click)="logout()" class="px-3 py-2 group flex items-center rounded-md hover:bg-gray-900 text-sm
+        font-medium text-blue-300 hover:text-white transition">
+          <img ngSrc="log-out.svg" alt="Log out" width="20" height="20" class="mr-3"/>
           Log out
         </a>
       </li>

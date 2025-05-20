@@ -1,11 +1,11 @@
 package edu.chnu.recman_backend.recipes.controllers;
 
 import edu.chnu.recman_backend.recipes.dtos.RecipeCreateRequest;
-import edu.chnu.recman_backend.recipes.dtos.RecipeDetails;
-import edu.chnu.recman_backend.recipes.dtos.RecipeListItem;
+import edu.chnu.recman_backend.recipes.dtos.RecipeResponse;
 import edu.chnu.recman_backend.recipes.dtos.RecipeUpdateRequest;
 import edu.chnu.recman_backend.recipes.services.RecipeService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,26 +14,23 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/recman/recipes")
+@RequiredArgsConstructor
 public class RecipeController {
     private final RecipeService service;
 
-    public RecipeController(RecipeService service) {
-        this.service = service;
-    }
-
     @PostMapping
-    public ResponseEntity<RecipeDetails> create(@Valid @RequestBody RecipeCreateRequest request) {
-        RecipeDetails created = service.create(request);
+    public ResponseEntity<RecipeResponse> create(@Valid @RequestBody RecipeCreateRequest request) {
+        RecipeResponse created = service.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @GetMapping
-    public ResponseEntity<List<RecipeListItem>> readAll() {
+    public ResponseEntity<List<RecipeResponse>> readAll() {
         return ResponseEntity.ok(service.readAll());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<RecipeDetails> read(@PathVariable Long id) {
+    public ResponseEntity<RecipeResponse> read(@PathVariable Long id) {
         return ResponseEntity.ok(service.read(id));
     }
 
