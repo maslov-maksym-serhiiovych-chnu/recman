@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gray-950 flex flex-col justify-center px-6 sm:px-12">
+<div class="px-6 min-h-screen bg-gray-950 flex flex-col justify-center sm:px-12">
   <div class="sm:mx-auto sm:w-full sm:max-w-md">
     <img ngSrc="logo.svg" alt="Logo" width="96" height="96" class="mx-auto"/>
     <h2 class="mt-6 text-center text-3xl font-bold tracking-tight text-white">
@@ -19,7 +19,9 @@
           <label for="username" class="block text-sm font-medium text-gray-200">Username</label>
           <div class="mt-1">
             <input id="username" name="username" type="text" formControlName="username"
-                   class="block w-full appearance-none rounded-md bg-gray-700 border border-gray-600 px-3 py-2 placeholder-gray-400 text-white shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm" />
+                   class="px-3 py-2 block w-full appearance-none rounded-md bg-gray-700 border border-gray-600
+                    placeholder-gray-400 text-white shadow-sm focus:border-blue-500 focus:outline-none
+                    focus:ring-blue-500 sm:text-sm" />
           </div>
           <p *ngIf="authForm.get('username')?.hasError('required') && authForm.get('username')?.touched"
              class="mt-1 text-sm text-red-500">Username is required</p>
@@ -35,7 +37,9 @@
           <label for="password" class="block text-sm font-medium text-gray-200">Password</label>
           <div class="mt-1">
             <input id="password" name="password" type="password" formControlName="password"
-                   class="block w-full appearance-none rounded-md bg-gray-700 border border-gray-600 px-3 py-2 placeholder-gray-400 text-white shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm" />
+                   class="block w-full appearance-none rounded-md bg-gray-700 border border-gray-600 px-3 py-2
+                   placeholder-gray-400 text-white shadow-sm focus:border-blue-500 focus:outline-none
+                   focus:ring-blue-500 sm:text-sm" />
           </div>
           <p *ngIf="authForm.get('password')?.hasError('required') && authForm.get('password')?.touched"
              class="mt-1 text-sm text-red-500">Password is required</p>
@@ -45,7 +49,9 @@
 
         <div>
           <button type="submit"
-                  class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                  class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm
+                  font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2
+                  focus:ring-blue-500 focus:ring-offset-2">
             Register
           </button>
         </div>
