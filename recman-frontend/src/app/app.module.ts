@@ -13,6 +13,8 @@ import {LoginComponent} from './auth/login/login.component';
 import {RegisterComponent} from './auth/register/register.component';
 import {LandingComponent} from './landing/landing.component';
 import {authInterceptor} from './auth/auth.interceptor';
+import { RecipeFormDialogComponent } from './recipes/recipe-form-dialog/recipe-form-dialog.component';
+import {MatDialogContent, MatDialogTitle} from '@angular/material/dialog';
 
 @NgModule({
   declarations: [
@@ -23,12 +25,15 @@ import {authInterceptor} from './auth/auth.interceptor';
     RegisterComponent,
     LayoutComponent,
     LandingComponent,
+    RecipeFormDialogComponent,
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     NgOptimizedImage,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    MatDialogContent,
+    MatDialogTitle
   ],
   providers: [provideHttpClient(withInterceptors([authInterceptor]))],
   bootstrap: [AppComponent]

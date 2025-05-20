@@ -21,6 +21,14 @@
             <input id="username" name="username" type="text" formControlName="username"
                    class="block w-full appearance-none rounded-md bg-gray-700 border border-gray-600 px-3 py-2 placeholder-gray-400 text-white shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm" />
           </div>
+          <p *ngIf="authForm.get('username')?.hasError('required') && authForm.get('username')?.touched"
+             class="mt-1 text-sm text-red-500">Username is required</p>
+          <p *ngIf="authForm.get('username')?.hasError('minlength') && authForm.get('username')?.touched"
+             class="mt-1 text-sm text-red-500">Username must be at least 3 characters</p>
+          <p *ngIf="authForm.get('username')?.hasError('maxlength') && authForm.get('username')?.touched"
+             class="mt-1 text-sm text-red-500">Username must be at most 50 characters</p>
+          <p *ngIf="authForm.get('username')?.hasError('usernameExists')"
+             class="mt-1 text-sm text-red-500">Username already exists</p>
         </div>
 
         <div>
@@ -29,6 +37,10 @@
             <input id="password" name="password" type="password" formControlName="password"
                    class="block w-full appearance-none rounded-md bg-gray-700 border border-gray-600 px-3 py-2 placeholder-gray-400 text-white shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm" />
           </div>
+          <p *ngIf="authForm.get('password')?.hasError('required') && authForm.get('password')?.touched"
+             class="mt-1 text-sm text-red-500">Password is required</p>
+          <p *ngIf="authForm.get('password')?.hasError('minlength') && authForm.get('password')?.touched"
+             class="mt-1 text-sm text-red-500">Password must be at least 8 characters</p>
         </div>
 
         <div>

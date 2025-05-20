@@ -18,7 +18,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(modifiedReq).pipe(
     catchError((error) => {
-      if (error.status === 401) {
+      if (error.status === 401 && !req.url.includes('/auth/login')) {
         tokenService.remove();
         router.navigate(['/landing']).then();
       }
