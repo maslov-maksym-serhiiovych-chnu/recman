@@ -1,13 +1,14 @@
 <div class="text-white">
-  <div class="flex justify-between items-center mb-6">
+  <div class="mb-6 flex justify-between items-center">
     <h2 class="text-3xl font-bold">Recipes</h2>
-    <button (click)="openCreateDialog()"
-            class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded shadow">
+
+    <button (click)="openDialog()" class="px-4 py-2 inline-flex items-center rounded shadow bg-blue-600
+    hover:bg-blue-700 text-sm font-medium text-white">
       + Add Recipe
     </button>
   </div>
 
-  <div class="overflow-hidden shadow ring-1 ring-white/10 sm:rounded-lg mb-6">
+  <div class="mb-6 overflow-hidden shadow ring-1 ring-white/10 sm:rounded-lg">
     <table class="min-w-full divide-y divide-gray-700 bg-gray-800 table-auto">
       <thead class="bg-gray-700">
       <tr>
@@ -16,13 +17,18 @@
         <th scope="col" class="px-6 py-3 text-left text-sm font-semibold text-white w-1/4">Actions</th>
       </tr>
       </thead>
+
       <tbody class="divide-y divide-gray-700">
       <tr *ngFor="let recipe of recipes" class="hover:bg-gray-900 transition align-top">
         <td class="px-6 py-4 text-sm break-words text-white">{{ recipe.name }}</td>
-        <td class="px-6 py-4 text-sm text-gray-300 break-words whitespace-pre-line">{{ recipe.description }}</td>
+        <td
+          class="px-6 py-4 text-sm text-gray-300 break-words whitespace-pre-line">{{ recipe.description |
+          slice:0:100 }}{{ recipe.description.length > 100 ? '...' : '' }}
+        </td>
         <td class="px-6 py-4 text-sm space-x-4">
-          <button (click)="openEditDialog(recipe)" class="text-yellow-400 hover:underline">Edit</button>
+          <button (click)="openDialog(recipe)" class="text-yellow-400 hover:underline">Edit</button>
           <button (click)="deleteRecipe(recipe)" class="text-red-400 hover:underline">Delete</button>
+          <button (click)="openViewDialog(recipe)" class="text-blue-400 hover:underline">Details</button>
         </td>
       </tr>
       </tbody>

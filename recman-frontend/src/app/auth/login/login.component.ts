@@ -41,7 +41,7 @@ export class LoginComponent implements OnInit {
         if (err.status === 401) {
           this.authError = 'Invalid username or password';
         } else {
-          this.authError = 'Something went wrong. Please try again later.';
+          this.authError = 'Something went wrong';
         }
       }
     });

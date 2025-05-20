@@ -1,7 +1,9 @@
 import {Component, OnInit} from '@angular/core';
 import {RecipeResponse, RecipesService} from './recipes.service';
-import {MatDialog} from '@angular/material/dialog';
 import {RecipeFormData, RecipeFormDialogComponent} from './recipe-form-dialog/recipe-form-dialog.component';
+import {MatDialog} from '@angular/material/dialog';
+import {take} from 'rxjs';
+import {RecipeViewDialogComponent} from './recipe-view-dialog/recipe-view-dialog.component';
 
 @Component({
   selector: 'app-recipes',
@@ -20,59 +22,37 @@ export class RecipesComponent implements OnInit {
   }
 
   fetchRecipes() {
-    this.recipesService.readAll().subscribe((data) => {
+    this.recipesService.readAll().pipe(take(1)).subscribe((data) => {
       this.recipes = data;
     });
   }
 
-  openCreateDialog() {
+  openDialog(recipe?: RecipeResponse) {
+    const formData: RecipeFormData = recipe ? {id: recipe.id, name: recipe.name, description: recipe.description} : {};
+
     const dialogRef = this.dialog.open(RecipeFormDialogComponent, {
       width: '500px',
       panelClass: 'dark-dialog',
-      data: {} as RecipeFormData
+      data: formData
     });
 
-    dialogRef.afterClosed().subscribe((result) => {
+    dialogRef.afterClosed().pipe(take(1)).subscribe((result) => {
       if (result) {
-        this.recipesService.create(result).subscribe({
-          next: () => this.fetchRecipes(),
-          error: (err) => {
-            if (err.status === 409) {
-              alert('A recipe with this name already exists');
-            } else {
-              alert(err.error.message || 'Something went wrong');
-            }
-          }
-        });
+        this.fetchRecipes();
       }
     });
   }
 
-  openEditDialog(recipe: RecipeResponse) {
-    const dialogRef = this.dialog.open(RecipeFormDialogComponent, {
+  openViewDialog(recipe: RecipeResponse) {
+    this.dialog.open(RecipeViewDialogComponent, {
       width: '500px',
       panelClass: 'dark-dialog',
-      data: {recipe}
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        this.recipesService.update(recipe.id, result).subscribe({
-          next: () => this.fetchRecipes(),
-          error: (err) => {
-            if (err.status === 409) {
-              alert('A recipe with this name already exists');
-            } else {
-              alert(err.error.message || 'Something went wrong');
-            }
-          }
-        });
-      }
+      data: recipe
     });
   }
 
   deleteRecipe(recipe: RecipeResponse) {
-    this.recipesService.delete(recipe.id).subscribe(() => {
+    this.recipesService.delete(recipe.id).pipe(take(1)).subscribe(() => {
       this.fetchRecipes();
     });
   }
